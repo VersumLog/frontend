@@ -1,1 +1,14 @@
-# my-project-frontend
+# VersomLog-frontend
+
+# ВСТАНОВЛЕННЯ
+1. Встанови Node.js (v24.14.1)
+https://nodejs.org/en/download
+
+2. Відкрий термінал в папці з проектом(найлегше - запустити в ній Git Bash)
+3. Введи в термінал npm install (воно бібліотеки завантажить)
+
+Для запуску пиши в терміналі:
+npm run dev
+
+Результат зазвичай за посиланням:
+http://localhost:3000
