@@ -6,7 +6,6 @@ const config = useRuntimeConfig();
 const email = ref('');
 const password = ref('');
 
-// Додано подію 'forgot-password'
 defineEmits(['switch', 'forgot-password']);
 
 const handleLogin = async () => {
@@ -57,7 +56,6 @@ const handleLogin = async () => {
 </template>
 
 <style scoped>
-/* Стилі ідентичні до AuthSignup для консистентності */
 .auth-card {
   background-color: #EFD6AC;
   padding: 40px;
@@ -100,10 +98,9 @@ input {
   font-family: inherit;
 }
 
-/* Стилі для нової кнопки */
 .forgot-password {
   margin-top: 15px;
-  text-align: left; /* Вирівнювання по лівому краю */
+  text-align: left;
 }
 
 .forgot-password button {
@@ -125,7 +122,7 @@ input {
   border-radius: 24px;
   border: none;
   font-weight: bold;
-  margin-top: 20px; /* Відступ трохи зменшено для балансу */
+  margin-top: 20px; 
   cursor: pointer;
 }
 
