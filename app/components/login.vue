@@ -10,7 +10,7 @@ const passwordFieldError = ref('');
 const isEmailValid = ref(false);
 const isPasswordValid = ref(false);
 
-defineEmits(['switch', 'forgot-password']);
+defineEmits(['switch', 'forgot']);
 
 const handleEmailBlur = () => {
   if (!email.value || email.value.trim() === '') {
@@ -50,8 +50,8 @@ const handleLogin = async () => {
     const response = await $fetch(`${config.public.apiBase}/api/Auth/login`, {
       method: 'POST',
       body: {
-        username: email.value,
-        password: password.value
+        UsernameOrGmail: email.value,
+        Password: password.value
       }
     });
     
@@ -118,7 +118,7 @@ const handleLogin = async () => {
     <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
     
     <div class="forgot-password">
-      <button @click="$emit('forgot-password')">Забув(</button>
+      <button @click="$emit('forgot')">Забув(</button>
     </div>
 
     <button class="main-btn" @click="handleLogin">Увійти</button>

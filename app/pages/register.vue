@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AuthSignup from '~/components/signup.vue'
-//import AuthLogin from '~/components/login.vue' 
+import AuthLogin from '~/components/login.vue' 
 import AuthForgotPass from '~/components/forgotpass.vue'
 
 const authMode = ref<'login' | 'signup' | 'forgot'>('signup')
