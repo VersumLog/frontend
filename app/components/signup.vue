@@ -10,7 +10,7 @@ defineEmits(['switch']);
 
 const handleSignup = async () => {
   errorMessage.value = '';
-  if (!nickname.value || !password.value || !email.value) {
+  if (!nickname.value || !password.value ||  !email.value) {
     errorMessage.value = "Будь ласка, заповніть всі поля";
     return;
   }
@@ -25,9 +25,8 @@ const handleSignup = async () => {
       method: 'POST',
       body: {
         username: nickname.value,
-        gmail: email.value,
         password: password.value,
-        confirmPassword: confirmPassword.value
+        email: email.value
       }
     });
     
