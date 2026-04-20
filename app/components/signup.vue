@@ -6,12 +6,21 @@ const confirmPassword = ref('');
 const config = useRuntimeConfig();
 const errorMessage = ref('');
 
+const isNicknameTaken = ref(false);
+
 defineEmits(['switch']);
 
 const handleSignup = async () => {
   errorMessage.value = '';
+  isNicknameTaken.value = false;
+
   if (!nickname.value || !password.value || !email.value) {
     errorMessage.value = "Будь ласка, заповніть всі поля";
+    return;
+  }
+
+  if (password.value.length < 8 || password.value.length > 20) {
+    errorMessage.value = "Пароль має бути не менше ніж 8 символів і не більше ніж 20";
     return;
   }
 
@@ -25,14 +34,20 @@ const handleSignup = async () => {
       method: 'POST',
       body: {
         username: nickname.value,
-        gmail: email.value,
         password: password.value,
-        confirmPassword: confirmPassword.value
+        email: email.value
       }
     });
     
     console.log("Успіх:", response);
-  } catch (error) {
+    
+  } catch (error: any) {
+    if (error.status === 400 || error.status === 409) {
+      errorMessage.value = "Цей нікнейм вже існує";
+      isNicknameTaken.value = true;
+    } else {
+      errorMessage.value = "Сталася помилка при реєстрації. Спробуйте пізніше.";
+    }
     console.error("Помилка при реєстрації:", error);
   }
 };
@@ -40,18 +55,25 @@ const handleSignup = async () => {
 
 <template>
   <div class="auth-card">
-    <div class="sign-up-tag">
-    </div>
+    <div class="sign-up-tag"></div>
 
     <h1 class="title">ВІТАЮ!</h1>
 
     <div class="inputs-group">
-      <input v-model="nickname" type="text" placeholder="Введіть нікнейм" />
+      <input 
+        v-model="nickname" 
+        type="text" 
+        placeholder="Введіть нікнейм" 
+        :class="{ 'input-error-border': isNicknameTaken }"
+        @input="isNicknameTaken = false" 
+      />
       <input v-model="email" type="email" placeholder="Введіть email" />
       <input v-model="password" type="password" placeholder="Введіть пароль" />
       <input v-model="confirmPassword" type="password" placeholder="Введіть пароль ще раз" />
     </div>
+
     <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+    
     <button class="main-btn" @click="handleSignup">Зареєструватися</button>
 
     <div class="footer-link">
@@ -61,6 +83,11 @@ const handleSignup = async () => {
 </template>
 
 <style scoped>
+.input-error-border {
+  outline: 2px solid #d9534f !important;
+  border: 1px solid #d9534f !important;
+}
+
 .auth-card {
   background-color: #EFD6AC;
   padding: 40px;
@@ -68,25 +95,6 @@ const handleSignup = async () => {
   width: 450px;
   position: relative;
   box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-}
-
-.sign-up-tag {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #6E2C4F;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  background-color: #6E2C4F;
-  transform: rotate(45deg);
 }
 
 .title {
@@ -110,16 +118,21 @@ const handleSignup = async () => {
   border-radius: 8px;
   text-align: center;
   font-size: 14px;
-  margin-bottom: 15px;
+  margin-top: 15px;
   border: 1px solid #d9534f;
 }
 
 input {
   padding: 16px 24px;
   border-radius: 16px;
-  border: none;
+  border: 1px solid transparent;
   background: white;
   font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+input:focus {
+  outline: 2px solid #432534;
 }
 
 .main-btn {
@@ -132,6 +145,11 @@ input {
   font-weight: bold;
   margin-top: 30px;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.main-btn:hover {
+  opacity: 0.9;
 }
 
 .footer-link {
@@ -146,9 +164,5 @@ input {
   color: #04151F;
   cursor: pointer;
   font-weight: 500;
-}
-
-button {
-  margin-top: 5px;
 }
 </style>
