@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import AuthSignup from '~/components/signup.vue'
-import AuthLogin from '~/components/login.vue'
+//import AuthLogin from '~/components/login.vue' 
+import AuthForgotPass from '~/components/forgotpass.vue'
 
-// Стан: 'login' або 'signup'
-const authMode = ref<'login' | 'signup'>('signup')
+const authMode = ref<'login' | 'signup' | 'forgot'>('signup')
 
-const toggleMode = () => {
-  authMode.value = authMode.value === 'login' ? 'signup' : 'login'
+const setMode = (mode: 'login' | 'signup' | 'forgot') => {
+  authMode.value = mode
 }
 </script>
 
@@ -14,15 +14,29 @@ const toggleMode = () => {
   <div class="auth-wrapper">
     <Transition name="fade" mode="out-in">
       <div :key="authMode">
-        <AuthSignup v-if="authMode === 'signup'" @switch="toggleMode" />
-        <AuthLogin v-else @switch="toggleMode" />
+        
+        <AuthSignup 
+          v-if="authMode === 'signup'" 
+          @switch="setMode('login')" 
+        />
+
+        <AuthLogin 
+          v-else-if="authMode === 'login'" 
+          @switch="setMode('signup')" 
+          @forgot="setMode('forgot')"
+        />
+
+        <AuthForgotPass 
+          v-else-if="authMode === 'forgot'" 
+          @switch="setMode('login')" 
+        />
+
       </div>
     </Transition>
   </div>
 </template>
 
 <style scoped>
-/* Анімація */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -43,6 +57,6 @@ const toggleMode = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f5f5f5; /* Тло сторінки */
+  background-color: #f5f5f5;
 }
 </style>
