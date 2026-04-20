@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import AuthSignup from '~/components/signup.vue'
-import AuthLogin from '~/components/login.vue'
 
-// Стан: 'login' або 'signup'
 const authMode = ref<'login' | 'signup'>('signup')
 
 const toggleMode = () => {
