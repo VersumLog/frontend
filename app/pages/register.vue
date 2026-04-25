@@ -17,18 +17,19 @@ const setMode = (mode: 'login' | 'signup' | 'forgot') => {
         
         <AuthSignup 
           v-if="authMode === 'signup'" 
-          @switch="setMode('login')" 
+          @login="setMode('login')" 
         />
 
         <AuthLogin 
           v-else-if="authMode === 'login'" 
-          @switch="setMode('signup')" 
+          @signup="setMode('signup')" 
           @forgot="setMode('forgot')"
         />
 
         <AuthForgotPass 
           v-else-if="authMode === 'forgot'" 
-          @switch="setMode('login')" 
+          @signup="setMode('signup')" 
+          @login="setMode('login')" 
         />
 
       </div>
