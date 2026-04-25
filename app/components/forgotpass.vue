@@ -62,7 +62,8 @@ const handleResetPassword = async () => {
       method: 'POST',
       body: {
         token: codeString,
-        newPassword: password.value 
+        newPassword: password.value,
+        email: email.value
       }
     });
 
