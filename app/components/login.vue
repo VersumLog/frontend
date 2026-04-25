@@ -10,7 +10,7 @@ const passwordFieldError = ref('');
 const isEmailValid = ref(false);
 const isPasswordValid = ref(false);
 
-defineEmits(['switch', 'forgot']);
+defineEmits(['signup', 'forgot']);
 
 const handleEmailBlur = () => {
   if (!email.value || email.value.trim() === '') {
@@ -60,20 +60,10 @@ const handleLogin = async () => {
     
     const status = error.status || error.response?.status;
 
-    if (status === 400 || status === 404) {
-
-      isEmailValid.value = false;
-      if (email.value.includes('@')) {
-        emailFieldError.value = "Неправильний email";
-      } else {
-        emailFieldError.value = "Такого імені не існує";
-      }
-    } else if (status === 401) {
-
-      isPasswordValid.value = false;
-      passwordFieldError.value = "Пароль неправильний";
+    if (error.data?.errors) {
+       errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
     } else {
-      errorMessage.value = "Сталася помилка при логіні. Спробуйте пізніше.";
+       errorMessage.value = error.data?.message || "Не вдалося змінити пароль";
     }
     
     console.error("Помилка при логіні:", error);
@@ -124,7 +114,7 @@ const handleLogin = async () => {
     <button class="main-btn" @click="handleLogin">Увійти</button>
 
     <div class="footer-link">
-      <button @click="$emit('switch')">Ще не маєте акаунту? Створити</button>
+      <button @click="$emit('signup')">Ще не маєте акаунту? Створити</button>
     </div>
   </div>
 </template>

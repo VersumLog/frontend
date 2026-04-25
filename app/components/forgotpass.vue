@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 const config = useRuntimeConfig();
-const emit = defineEmits(['switch']);
+const emit = defineEmits(['signup', 'login']);
 
 const currentStep = ref<'forgot' | 'code' | 'renew'>('forgot');
 
@@ -68,7 +68,7 @@ const handleResetPassword = async () => {
     });
 
     alert("Пароль успішно змінено!");
-    emit('switch'); 
+    emit('login'); 
   } catch (error: any) {
     if (error.data?.errors) {
        errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
@@ -89,7 +89,7 @@ const handleResetPassword = async () => {
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
       <button class="main-btn" @click="handleSendEmail">Відновити пароль</button>
       <div class="footer-link">
-        <button @click="$emit('switch')">Немає облікового запису?</button>
+        <button @click="$emit('signup')">Немає облікового запису?</button>
       </div>
     </div>
 
