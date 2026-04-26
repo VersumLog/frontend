@@ -4,7 +4,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
         public: {
-          apiBase: 'https://localhost:7014' // Порт вашого бекенду
+          apiBase: 'https://localhost:7014', // Порт вашого бекенду
+          isProd: !import.meta.dev
         }
     }
 })

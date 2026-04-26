@@ -9,7 +9,7 @@ const successMessage = ref('');
 
 const isNicknameTaken = ref(false);
 
-defineEmits(['login']);
+const emit = defineEmits(['login']);
 
 const handleSignup = async () => {
   errorMessage.value = '';

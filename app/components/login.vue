@@ -46,16 +46,28 @@ const handleLogin = async () => {
     return;
   }
 
+  const tokenCookie = useCookie('auth_token', {
+    maxAge: 60 * 1440, // 24 hours
+    sameSite: 'lax',
+    secure: config.public.isProd,
+  });
+
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/Auth/login`, {
+    const response = await $fetch<any>(`${config.public.apiBase}/api/Auth/login`, {
       method: 'POST',
       body: {
         UsernameOrGmail: email.value,
         Password: password.value
       }
     });
+    console.log("Успіх:", response);
+    if (response.token) {
+    tokenCookie.value = response.token; 
     
-   console.log("Успіх:", response);
+    console.log("Токен успішно збережено в браузері!");
+    
+    navigateTo('/'); 
+  }
   } catch (error: any) {
     
     const status = error.status || error.response?.status;
