@@ -2,12 +2,12 @@
 import { ref } from 'vue';
 
 const config = useRuntimeConfig();
-const emit = defineEmits(['switch']);
+const emit = defineEmits(['signup', 'login']);
 
 const currentStep = ref<'forgot' | 'code' | 'renew'>('forgot');
 
 const email = ref('');
-const verificationCode = ref(['', '', '', '', '', '']); 
+const verificationCode = ref(['', '', '', '', '', '']);
 const password = ref('');
 const confirmPassword = ref('');
 const errorMessage = ref('');
@@ -26,12 +26,23 @@ const handleKeydown = (event: KeyboardEvent, index: number) => {
   }
 };
 
+const handlePaste = (event: ClipboardEvent) => {
+  const data = event.clipboardData?.getData('text').replace(/\D/g, '').slice(0, 6);
+  if (data) {
+    data.split('').forEach((char, i) => {
+      verificationCode.value[i] = char;
+    });
+    codeInputs.value[data.length - 1]?.focus();
+  }
+};
+
+
 const handleSendEmail = async () => {
   errorMessage.value = '';
   try {
     await $fetch(`${config.public.apiBase}/api/Auth/forgot-password`, {
       method: 'POST',
-      body: { email: email.value } 
+      body: { email: email.value }
     });
     currentStep.value = 'code';
   } catch (error: any) {
@@ -39,14 +50,25 @@ const handleSendEmail = async () => {
   }
 };
 
-const goToRenew = () => {
+const goToRenew = async () => {
   const codeString = verificationCode.value.join('');
   if (codeString.length < 6) {
     errorMessage.value = "Введіть повний код (6 цифр)";
     return;
   }
-  errorMessage.value = '';
-  currentStep.value = 'renew';
+  try {
+    await $fetch(`${config.public.apiBase}/api/Auth/reset-password-token-check`, {
+      method: 'POST',
+      body: {
+        token: codeString,
+        email: email.value
+      }
+    });
+    errorMessage.value = '';
+    currentStep.value = 'renew';
+  } catch (error: any) {
+    errorMessage.value = error.data?.message || "Помилка при запиті";
+  }
 };
 
 const handleResetPassword = async () => {
@@ -62,17 +84,18 @@ const handleResetPassword = async () => {
       method: 'POST',
       body: {
         token: codeString,
-        newPassword: password.value 
+        newPassword: password.value,
+        email: email.value
       }
     });
 
     alert("Пароль успішно змінено!");
-    emit('switch'); 
+    emit('login');
   } catch (error: any) {
     if (error.data?.errors) {
-       errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
+      errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
     } else {
-       errorMessage.value = error.data?.message || "Не вдалося змінити пароль";
+      errorMessage.value = error.data?.message || "Не вдалося змінити пароль";
     }
   }
 };
@@ -88,24 +111,16 @@ const handleResetPassword = async () => {
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
       <button class="main-btn" @click="handleSendEmail">Відновити пароль</button>
       <div class="footer-link">
-        <button @click="$emit('switch')">Немає облікового запису?</button>
+        <button @click="$emit('signup')">Немає облікового запису?</button>
       </div>
     </div>
 
     <div v-if="currentStep === 'code'" class="step-container">
       <h3 class="subtitle">Введіть 6-значний код з вашої пошти</h3>
       <div class="code-inputs-group">
-        <input 
-          v-for="(digit, index) in 6" 
-          :key="index"
-          ref="codeInputs"
-          v-model="verificationCode[index]" 
-          type="text" 
-          maxlength="1"
-          class="code-input"
-          @input="handleInput(index)"
-          @keydown="handleKeydown($event, index)" 
-        />
+        <input v-for="(n, index) in 6" :key="index" ref="codeInputs" v-model="verificationCode[index]" type="text"
+          maxlength="1" @input="handleInput(index)" @keydown="handleKeydown($event, index)" @paste.prevent="handlePaste"
+          class="code-input" />
       </div>
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
       <button class="main-btn" @click="goToRenew">Підтвердити код</button>
@@ -126,7 +141,7 @@ const handleResetPassword = async () => {
 <style scoped>
 .auth-card {
   background-color: #EFD6AC;
-  padding: 40px; 
+  padding: 40px;
   border-radius: 32px;
   width: 450px;
   position: relative;

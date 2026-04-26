@@ -9,7 +9,7 @@ const successMessage = ref('');
 
 const isNicknameTaken = ref(false);
 
-defineEmits(['switch']);
+defineEmits(['login']);
 
 const handleSignup = async () => {
   errorMessage.value = '';
@@ -52,9 +52,16 @@ const handleSignup = async () => {
     if (error.status === 400 || error.status === 409) {
       errorMessage.value = "Цей нікнейм чи пошта вже існує";
       isNicknameTaken.value = true;
+      
+      if (error.data?.errors) {
+        errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
+      } else if (error.data?.message) {
+        errorMessage.value = error.data.message;
+      }
     } else {
       errorMessage.value = "Сталася помилка при реєстрації. Спробуйте пізніше.";
     }
+    
     console.error("Помилка при реєстрації:", error);
   }
 };
@@ -86,7 +93,7 @@ const handleSignup = async () => {
     <button class="main-btn" @click="handleSignup">Зареєструватися</button>
 
     <div class="footer-link">
-      <button @click="$emit('switch')">Вже маю обліковий запис</button>
+      <button @click="$emit('login')">Вже маю обліковий запис</button>
     </div>
   </div>
 </template>
