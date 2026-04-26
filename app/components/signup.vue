@@ -5,6 +5,7 @@ const password = ref('');
 const confirmPassword = ref('');
 const config = useRuntimeConfig();
 const errorMessage = ref('');
+const successMessage = ref('');
 
 const isNicknameTaken = ref(false);
 
@@ -12,6 +13,7 @@ defineEmits(['switch']);
 
 const handleSignup = async () => {
   errorMessage.value = '';
+  successMessage.value = '';
   isNicknameTaken.value = false;
 
   if (!nickname.value || !password.value || !email.value) {
@@ -39,11 +41,16 @@ const handleSignup = async () => {
       }
     });
     
-    console.log("Успіх:", response);
-    
+  successMessage.value = "Реєстрація успішна! Перевірте пошту для підтвердження :)";
+
+   nickname.value = '';
+   email.value = '';
+   password.value = '';
+   confirmPassword.value = '';
+  
   } catch (error: any) {
     if (error.status === 400 || error.status === 409) {
-      errorMessage.value = "Цей нікнейм вже існує";
+      errorMessage.value = "Цей нікнейм чи пошта вже існує";
       isNicknameTaken.value = true;
     } else {
       errorMessage.value = "Сталася помилка при реєстрації. Спробуйте пізніше.";
@@ -63,7 +70,7 @@ const handleSignup = async () => {
       <input 
         v-model="nickname" 
         type="text" 
-        placeholder="Введіть нікнейм" 
+        placeholder="Введіть нікнейм(малими літерами)" 
         :class="{ 'input-error-border': isNicknameTaken }"
         @input="isNicknameTaken = false" 
       />
@@ -74,6 +81,8 @@ const handleSignup = async () => {
 
     <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
     
+    <p v-if="successMessage" class="success-text"> {{ successMessage }}</p>
+
     <button class="main-btn" @click="handleSignup">Зареєструватися</button>
 
     <div class="footer-link">
@@ -120,6 +129,18 @@ const handleSignup = async () => {
   font-size: 14px;
   margin-top: 15px;
   border: 1px solid #d9534f;
+}
+
+.success-text{
+  color:#28a745;
+  background-color:#eafaf1;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+  margin-top: 15px;
+  border: 1px solid #28a745;
+  font-weight: 500;
 }
 
 input {
