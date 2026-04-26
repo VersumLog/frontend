@@ -23,7 +23,7 @@ const setMode = (mode: 'login' | 'signup' | 'forgot') => {
         <AuthLogin 
           v-else-if="authMode === 'login'" 
           @switch="setMode('signup')" 
-          @forgot-password="setMode('forgot')"
+          @forgot="setMode('forgot')"
         />
 
         <AuthForgotPass 
