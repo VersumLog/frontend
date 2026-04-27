@@ -32,18 +32,18 @@
               <div class="form-section">
                 <input 
                   type="text" 
-                  v-model="form.name" 
-                  maxlength="30"
-                  placeholder="Ім'я користувача" 
+                  v-model="form.username" 
+                  maxlength="50"
+                  @input="form.username = form.username.toLowerCase().replace(/[^a-z0-9_]/g, '')"
+                  placeholder="Нікнейм" 
                   class="custom-input" 
                 />
                 
                 <input 
                   type="text" 
-                  v-model="form.username" 
-                  maxlength="50"
-                  @input="form.username = form.username.toLowerCase().replace(/[^a-z0-9_]/g, '')"
-                  placeholder="Нікнейм" 
+                  v-model="form.name" 
+                  maxlength="30"
+                  placeholder="Ім'я користувача" 
                   class="custom-input" 
                 />
                 
@@ -83,6 +83,14 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 
+const props = defineProps<{
+  initialData?: {
+    name: string;
+    username: string;
+    bio: string;
+  }
+}>()
+
 const config = useRuntimeConfig()
 
 const isEditModalOpen = ref(false)
@@ -96,6 +104,11 @@ const form = reactive({
 })
 
 const openEditModal = () => {
+  if (props.initialData) {
+    form.name = props.initialData.name || ''
+    form.username = props.initialData.username || ''
+    form.bio = props.initialData.bio || ''
+  }
   isEditModalOpen.value = true
 }
 
@@ -120,7 +133,7 @@ const saveProfile = async () => {
   errorMessage.value = ''
   
   try {
-    const token = localStorage.getItem('token') 
+    const token = useCookie('auth_token').value; 
 
     const response = await $fetch<{ message: string }>(`${config.public.apiBase}/api/Profile/update-profile`, {
       method: 'POST',
@@ -307,8 +320,6 @@ const saveProfile = async () => {
   color: #000000;
   margin-bottom: 30px;
 }
-
-
 
 .confirm-actions {
   display: flex;
