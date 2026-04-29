@@ -201,6 +201,7 @@ const saveProfile = async () => {
   padding: 20px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   position: relative;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .edit-modal {
@@ -259,8 +260,8 @@ const saveProfile = async () => {
   padding: 12px;
   border-radius: 4px;
   color: #000000;
-  font-family: inherit;
   box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .custom-textarea {
@@ -291,6 +292,7 @@ const saveProfile = async () => {
   font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .close-btn {
