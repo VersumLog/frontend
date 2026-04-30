@@ -163,6 +163,8 @@ const saveProfile = async () => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 .open-settings-btn {
   background: #E4C1D3;
   border: 2px solid #7E4864;
@@ -321,6 +323,7 @@ const saveProfile = async () => {
   font-size: 18px;
   color: #000000;
   margin-bottom: 30px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .confirm-actions {
