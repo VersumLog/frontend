@@ -110,7 +110,8 @@ const openEditModal = async () => {
   try {
     const token = useCookie('auth_token').value
     const currentUsername = route.params.username
-    
+    const newUsername = form.username;
+
     if (!currentUsername) {
       errorMessage.value = "Помилка: невідомий користувач"
       isLoadingData.value = false
@@ -129,6 +130,7 @@ const openEditModal = async () => {
       form.username = response.username || response.Username || ''
       form.bio = response.bio || response.Bio || ''
     }
+
   } catch (error) {
     errorMessage.value = "Не вдалося завантажити поточні дані"
   } finally {
@@ -157,8 +159,8 @@ const saveProfile = async () => {
   errorMessage.value = ''
   
   try {
-    const token = useCookie('auth_token').value
-
+    const token = useCookie('auth_token').value;
+    const newUsername = form.username;
     await $fetch<{ message: string }>(`${config.public.apiBase}/api/Profile/update-profile`, {
       method: 'POST',
       headers: {
@@ -173,7 +175,7 @@ const saveProfile = async () => {
 
     isEditModalOpen.value = false
     errorMessage.value = ''
-    window.location.reload()
+    await navigateTo(`/profile/${newUsername}`);
 
   } catch (error: any) {
     if (error.data?.errors) {
