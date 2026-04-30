@@ -59,6 +59,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRuntimeConfig, useCookie } from '#imports' 
 
 const isModalOpen = ref(false)
 const step = ref(1)
@@ -68,14 +69,13 @@ const hasPasswordError = ref(false)
 
 const errorMessage = ref('');
 
-const CORRECT_PASSWORD_MOCK = "12345"
-
 const openModal = () => {
   isModalOpen.value = true
   step.value = 1
   password.value = ''
   confirmationWord.value = ''
   hasPasswordError.value = false
+  errorMessage.value = ''
 }
 
 const closeModal = () => {
@@ -86,6 +86,7 @@ const submitPassword = () => {
   if (!password.value.trim()) return
   step.value = 2
   hasPasswordError.value = false
+  errorMessage.value = ''
 }
 
 const submitFinal = async () => {
@@ -110,10 +111,10 @@ const submitFinal = async () => {
       
     } catch (error: any) {
       if (error.data?.errors) {
-      errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
-    } else {
-      errorMessage.value = error.data?.message || "Не вдалося змінити пароль";
-    }
+        errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
+      } else {
+        errorMessage.value = error.data?.message || "Не вдалося змінити пароль";
+      }
       
       step.value = 1;
       hasPasswordError.value = true;
@@ -121,13 +122,22 @@ const submitFinal = async () => {
       confirmationWord.value = '';
     }
   } else {
-    
       errorMessage.value = "Слово введено неправильно. Спробуйте ще раз.";
   }
 }
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+.delete-account-container,
+.modal-content,
+.modal-input,
+.delete-account-btn,
+.confirm-btn {
+  font-family: 'Montserrat', sans-serif;
+}
+
 .delete-account-container {
   display: inline-block;
 }
@@ -233,5 +243,12 @@ const submitFinal = async () => {
 .confirm-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.error-text {
+  color: #8b0000;
+  font-size: 14px;
+  margin-bottom: 15px;
+  font-weight: 500;
 }
 </style>
