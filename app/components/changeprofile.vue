@@ -30,37 +30,41 @@
               </div>
 
               <div class="form-section">
-                <input 
-                  type="text" 
-                  v-model="form.username" 
+                <input
+                  type="text"
+                  v-model="form.username"
                   maxlength="50"
                   @input="form.username = form.username.toLowerCase().replace(/[^a-z0-9_]/g, '')"
-                  placeholder="Нікнейм" 
-                  class="custom-input" 
+                  placeholder="Нікнейм"
+                  class="custom-input"
+                  :disabled="isLoadingData"
                 />
                 
-                <input 
-                  type="text" 
-                  v-model="form.name" 
+                <input
+                  type="text"
+                  v-model="form.name"
                   maxlength="30"
-                  placeholder="Ім'я користувача" 
-                  class="custom-input" 
+                  placeholder="Ім'я користувача"
+                  class="custom-input"
+                  :disabled="isLoadingData"
                 />
                 
-                <textarea 
-                  v-model="form.bio" 
+                <textarea
+                  v-model="form.bio"
                   maxlength="200"
-                  placeholder="Про мене:" 
+                  placeholder="Про мене:"
                   class="custom-textarea"
+                  :disabled="isLoadingData"
                 ></textarea>
                 
                 <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+                <p v-if="isLoadingData" class="loading-text">Завантаження даних...</p>
               </div>
             </div>
 
             <div class="modal-footer">
-              <button class="btn-primary confirm-btn" @click="saveProfile">Підтвердити</button>
-              <button class="close-btn" @click="openConfirmModal">&times;</button>
+              <button class="btn-primary confirm-btn" @click="saveProfile" :disabled="isLoadingData">Підтвердити</button>
+              <button class="close-btn" @click="openConfirmModal" :disabled="isLoadingData">&times;</button>
             </div>
           </div>
 
@@ -82,20 +86,15 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-
-const props = defineProps<{
-  initialData?: {
-    name: string;
-    username: string;
-    bio: string;
-  }
-}>()
+import { useRoute } from 'vue-router'
 
 const config = useRuntimeConfig()
+const route = useRoute()
 
 const isEditModalOpen = ref(false)
 const isConfirmModalOpen = ref(false)
 const errorMessage = ref('')
+const isLoadingData = ref(false)
 
 const form = reactive({
   name: '',      
@@ -103,13 +102,40 @@ const form = reactive({
   bio: ''        
 })
 
-const openEditModal = () => {
-  if (props.initialData) {
-    form.name = props.initialData.name || ''
-    form.username = props.initialData.username || ''
-    form.bio = props.initialData.bio || ''
-  }
+const openEditModal = async () => {
   isEditModalOpen.value = true
+  isLoadingData.value = true
+  errorMessage.value = ''
+  
+  try {
+    const token = useCookie('auth_token').value
+    const currentUsername = route.params.username
+    const newUsername = form.username;
+
+    if (!currentUsername) {
+      errorMessage.value = "Помилка: невідомий користувач"
+      isLoadingData.value = false
+      return
+    }
+
+    const response = await $fetch<any>(`${config.public.apiBase}/api/Profile/${currentUsername}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : ''
+      }
+    })
+    
+    if (response) {
+      form.name = response.name || response.Name || ''
+      form.username = response.username || response.Username || ''
+      form.bio = response.bio || response.Bio || ''
+    }
+
+  } catch (error) {
+    errorMessage.value = "Не вдалося завантажити поточні дані"
+  } finally {
+    isLoadingData.value = false
+  }
 }
 
 const openConfirmModal = () => {
@@ -133,9 +159,9 @@ const saveProfile = async () => {
   errorMessage.value = ''
   
   try {
-    const token = useCookie('auth_token').value; 
-
-    const response = await $fetch<{ message: string }>(`${config.public.apiBase}/api/Profile/update-profile`, {
+    const token = useCookie('auth_token').value;
+    const newUsername = form.username;
+    await $fetch<{ message: string }>(`${config.public.apiBase}/api/Profile/update-profile`, {
       method: 'POST',
       headers: {
         'Authorization': token ? `Bearer ${token}` : ''
@@ -147,12 +173,11 @@ const saveProfile = async () => {
       }
     })
 
-    console.log('Успіх:', response.message)
     isEditModalOpen.value = false
     errorMessage.value = ''
+    await navigateTo(`/profile/${newUsername}`);
 
   } catch (error: any) {
-    console.error("Помилка збереження:", error)
     if (error.data?.errors) {
       errorMessage.value = Object.values(error.data.errors).flat()[0] as string
     } else {
@@ -163,6 +188,8 @@ const saveProfile = async () => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 .open-settings-btn {
   background: #E4C1D3;
   border: 2px solid #7E4864;
@@ -201,11 +228,12 @@ const saveProfile = async () => {
   padding: 20px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   position: relative;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .edit-modal {
   width: 600px;
-  min-height: 250px; 
+  min-height: 250px;
 }
 
 .modal-body {
@@ -259,8 +287,13 @@ const saveProfile = async () => {
   padding: 12px;
   border-radius: 4px;
   color: #000000;
-  font-family: inherit;
   box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.custom-input:disabled, .custom-textarea:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .custom-textarea {
@@ -274,6 +307,14 @@ const saveProfile = async () => {
   text-align: center;
   margin-top: -5px;
   font-weight: bold;
+}
+
+.loading-text {
+  color: #52AFA0;
+  font-size: 13px;
+  text-align: center;
+  margin-top: -5px;
+  font-style: italic;
 }
 
 .modal-footer {
@@ -291,6 +332,12 @@ const saveProfile = async () => {
   font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .close-btn {
@@ -302,6 +349,11 @@ const saveProfile = async () => {
   font-size: 32px;
   color: #000000;
   cursor: pointer;
+}
+
+.close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .confirm-modal {
@@ -319,6 +371,7 @@ const saveProfile = async () => {
   font-size: 18px;
   color: #000000;
   margin-bottom: 30px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .confirm-actions {
