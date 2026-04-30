@@ -35,7 +35,7 @@
                   v-model="form.username" 
                   maxlength="50"
                   @input="form.username = form.username.toLowerCase().replace(/[^a-z0-9_]/g, '')"
-                  placeholder="Нікнейм" 
+                  :placeholder="oldData.username || 'Нікнейм'" 
                   class="custom-input" 
                 />
                 
@@ -43,14 +43,14 @@
                   type="text" 
                   v-model="form.name" 
                   maxlength="30"
-                  placeholder="Ім'я користувача" 
+                  :placeholder="oldData.name || 'Ім\'я користувача'" 
                   class="custom-input" 
                 />
                 
                 <textarea 
                   v-model="form.bio" 
                   maxlength="200"
-                  placeholder="Про мене:" 
+                  :placeholder="oldData.bio || 'Про мене:'" 
                   class="custom-textarea"
                 ></textarea>
                 
@@ -103,13 +103,41 @@ const form = reactive({
   bio: ''        
 })
 
-const openEditModal = () => {
+const oldData = reactive({
+  name: '',      
+  username: '',  
+  bio: ''        
+})
+
+const openEditModal = async () => {
   if (props.initialData) {
     form.name = props.initialData.name || ''
     form.username = props.initialData.username || ''
     form.bio = props.initialData.bio || ''
   }
+  
   isEditModalOpen.value = true
+
+  try {
+    const token = useCookie('auth_token').value; 
+    
+    const response = await $fetch<{ name: string, username: string, bio: string }>(`${config.public.apiBase}/api/Profile/me`, {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : ''
+      }
+    })
+
+    oldData.name = response.name || ''
+    oldData.username = response.username || ''
+    oldData.bio = response.bio || ''
+
+    form.name = response.name || ''
+    form.username = response.username || ''
+    form.bio = response.bio || ''
+
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 const openConfirmModal = () => {
@@ -135,7 +163,7 @@ const saveProfile = async () => {
   try {
     const token = useCookie('auth_token').value; 
 
-    const response = await $fetch<{ message: string }>(`${config.public.apiBase}/api/Profile/update-profile`, {
+    await $fetch<{ message: string }>(`${config.public.apiBase}/api/Profile/update-profile`, {
       method: 'POST',
       headers: {
         'Authorization': token ? `Bearer ${token}` : ''
@@ -147,12 +175,11 @@ const saveProfile = async () => {
       }
     })
 
-    console.log('Успіх:', response.message)
     isEditModalOpen.value = false
     errorMessage.value = ''
 
   } catch (error: any) {
-    console.error("Помилка збереження:", error)
+    console.error(error)
     if (error.data?.errors) {
       errorMessage.value = Object.values(error.data.errors).flat()[0] as string
     } else {
