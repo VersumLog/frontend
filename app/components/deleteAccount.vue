@@ -24,9 +24,11 @@
             @keyup.enter="submitPassword"
           />
           
+          <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
           <button class="confirm-btn" @click="submitPassword" :disabled="!password.trim()">
             Підтвердити
           </button>
+          
         </div>
 
         <div v-if="step === 2" class="step-container">
@@ -42,6 +44,8 @@
             @keyup.enter="submitFinal"
           />
           
+      <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+          
           <button class="confirm-btn" @click="submitFinal" :disabled="!confirmationWord.trim()">
             Підтвердити
           </button>
@@ -53,7 +57,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
 const isModalOpen = ref(false)
@@ -61,6 +65,8 @@ const step = ref(1)
 const password = ref('')
 const confirmationWord = ref('')
 const hasPasswordError = ref(false)
+
+const errorMessage = ref('');
 
 const CORRECT_PASSWORD_MOCK = "12345"
 
@@ -78,24 +84,45 @@ const closeModal = () => {
 
 const submitPassword = () => {
   if (!password.value.trim()) return
-
-  if (password.value === CORRECT_PASSWORD_MOCK) {
-    step.value = 2
-    hasPasswordError.value = false
-  } else {
-    hasPasswordError.value = true
-    password.value = '' 
-  }
+  step.value = 2
+  hasPasswordError.value = false
 }
 
-const submitFinal = () => {
+const submitFinal = async () => {
   if (!confirmationWord.value.trim()) return
 
   if (confirmationWord.value.trim().toLowerCase() === 'видалити') {
-    console.log("Акаунт успішно видалено!");
-    closeModal();
+    try {
+      const config = useRuntimeConfig();
+      const token = useCookie('auth_token').value; 
+      const response = await $fetch(`${config.public.apiBase}/api/Profile/delete-account`, {
+        method: 'POST', 
+        headers: {
+        'Authorization': token ? `Bearer ${token}` : ''
+      },
+        body: {
+          password: password.value
+        }
+      });
+
+      console.log("Акаунт успішно видалено!", response);
+      closeModal();
+      
+    } catch (error: any) {
+      if (error.data?.errors) {
+      errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
+    } else {
+      errorMessage.value = error.data?.message || "Не вдалося змінити пароль";
+    }
+      
+      step.value = 1;
+      hasPasswordError.value = true;
+      password.value = '';
+      confirmationWord.value = '';
+    }
   } else {
-    alert("Слово введено неправильно. Спробуйте ще раз.");
+    
+      errorMessage.value = "Слово введено неправильно. Спробуйте ще раз.";
   }
 }
 </script>
