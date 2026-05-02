@@ -1,95 +1,10 @@
-<template>
-  <div>
-    <button class="open-settings-btn" @click="openEditModal">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-      </svg>
-    </button>
-
-    <Transition name="fade">
-      <div v-if="isEditModalOpen || isConfirmModalOpen" class="modal-overlay">
-        <Transition name="scale" mode="out-in">
-          
-          <div v-if="isEditModalOpen && !isConfirmModalOpen" class="modal edit-modal">
-            <div class="modal-body">
-              <div class="avatar-section">
-                <div class="avatar-placeholder">
-                  <div class="avatar-icon">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                  </div>
-                  <div class="edit-avatar-badge">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-section">
-                <input
-                  type="text"
-                  v-model="form.username"
-                  maxlength="50"
-                  @input="form.username = form.username.toLowerCase().replace(/[^a-z0-9_]/g, '')"
-                  placeholder="Нікнейм"
-                  class="custom-input"
-                  :disabled="isLoadingData"
-                />
-                
-                <input
-                  type="text"
-                  v-model="form.name"
-                  maxlength="30"
-                  placeholder="Ім'я користувача"
-                  class="custom-input"
-                  :disabled="isLoadingData"
-                />
-                
-                <textarea
-                  v-model="form.bio"
-                  maxlength="200"
-                  placeholder="Про мене:"
-                  class="custom-textarea"
-                  :disabled="isLoadingData"
-                ></textarea>
-                
-                <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-                <p v-if="isLoadingData" class="loading-text">Завантаження даних...</p>
-              </div>
-            </div>
-
-            <div class="modal-footer">
-              <button class="btn-primary confirm-btn" @click="saveProfile" :disabled="isLoadingData">Підтвердити</button>
-              <button class="close-btn" @click="openConfirmModal" :disabled="isLoadingData">&times;</button>
-            </div>
-          </div>
-
-          <div v-else-if="isConfirmModalOpen" class="modal confirm-modal">
-            <div class="modal-body confirm-body">
-              <p class="confirm-text">Ви впевнені, що хочете скасувати зміни?</p>
-              <div class="confirm-actions">
-                <button class="btn-primary" @click="cancelChanges">Так</button>
-                <button class="btn-primary" @click="continueEditing">Редагувати далі</button>
-              </div>
-            </div>
-          </div>
-
-        </Transition>
-      </div>
-    </Transition>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 
 const config = useRuntimeConfig()
 const route = useRoute()
+const { token, nickname } = useAuth();
 
 const isEditModalOpen = ref(false)
 const isConfirmModalOpen = ref(false)
@@ -97,45 +12,23 @@ const errorMessage = ref('')
 const isLoadingData = ref(false)
 
 const form = reactive({
-  name: '',      
-  username: '',  
-  bio: ''        
+  name: '',
+  username: '',
+  bio: ''
 })
 
-const openEditModal = async () => {
+const props = defineProps<{
+  userData: any
+}>()
+
+const emit = defineEmits(['profile-updated'])
+const openEditModal = () => {
   isEditModalOpen.value = true
-  isLoadingData.value = true
   errorMessage.value = ''
-  
-  try {
-    const token = useCookie('auth_token').value
-    const currentUsername = route.params.username
-    const newUsername = form.username;
 
-    if (!currentUsername) {
-      errorMessage.value = "Помилка: невідомий користувач"
-      isLoadingData.value = false
-      return
-    }
-
-    const response = await $fetch<any>(`${config.public.apiBase}/api/Profile/${currentUsername}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : ''
-      }
-    })
-    
-    if (response) {
-      form.name = response.name || response.Name || ''
-      form.username = response.username || response.Username || ''
-      form.bio = response.bio || response.Bio || ''
-    }
-
-  } catch (error) {
-    errorMessage.value = "Не вдалося завантажити поточні дані"
-  } finally {
-    isLoadingData.value = false
-  }
+  form.name = props.userData?.name || props.userData?.Name || ''
+  form.username = props.userData?.username || props.userData?.Username || ''
+  form.bio = props.userData?.bio || props.userData?.Bio || ''
 }
 
 const openConfirmModal = () => {
@@ -156,40 +49,114 @@ const cancelChanges = () => {
 }
 
 const saveProfile = async () => {
-  errorMessage.value = ''
-  
+  errorMessage.value = '';
+
   try {
-    const token = useCookie('auth_token').value;
     const newUsername = form.username;
-    await $fetch<{ message: string }>(`${config.public.apiBase}/api/Profile/update-profile`, {
+
+    const response = await $fetch<{ message: string, newToken?: string }>(`${config.public.apiBase}/api/Profile/update-profile`, {
       method: 'POST',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : ''
-      },
+      headers: token ? { 'Authorization': `Bearer ${token.value}` } : {},
       body: {
         Username: form.username,
         Name: form.name,
         Bio: form.bio
       }
-    })
+    });
 
-    isEditModalOpen.value = false
-    errorMessage.value = ''
-    await navigateTo(`/profile/${newUsername}`);
+    nickname.value = newUsername;
+
+    if (response.newToken) {
+      useCookie('auth_token').value = response.newToken;
+    }
+
+    isEditModalOpen.value = false;
+    errorMessage.value = '';
+    emit('profile-updated');
+    if (form.username !== props.userData?.username) {
+      await navigateTo(`/profile/${form.username}`);
+    }
 
   } catch (error: any) {
     if (error.data?.errors) {
-      errorMessage.value = Object.values(error.data.errors).flat()[0] as string
+      errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
     } else {
-      errorMessage.value = error.data?.message || "Не вдалося зберегти профіль"
+      errorMessage.value = error.data?.message || "Не вдалося зберегти профіль";
     }
   }
 }
 </script>
 
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+<template>
+  <div>
+    <button class="open-settings-btn" @click="openEditModal">
+      <Icon name="ph:gear-six-bold" class="w-6 h-6 text-[#744458] hover:rotate-90 transition-transform duration-300" />
+    </button>
 
+    <Transition name="fade">
+      <div v-if="isEditModalOpen || isConfirmModalOpen" class="modal-overlay">
+        <Transition name="scale" mode="out-in">
+
+          <div v-if="isEditModalOpen && !isConfirmModalOpen" class="modal edit-modal">
+            <div class="modal-body">
+              <div class="avatar-section">
+                <div class="avatar-placeholder">
+                  <div class="avatar-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <div class="edit-avatar-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <input type="text" v-model="form.username" maxlength="50"
+                  @input="form.username = form.username.toLowerCase().replace(/[^a-z0-9_]/g, '')" placeholder="Нікнейм"
+                  class="custom-input" :disabled="isLoadingData" />
+
+                <input type="text" v-model="form.name" maxlength="30" placeholder="Ім'я користувача"
+                  class="custom-input" :disabled="isLoadingData" />
+
+                <textarea v-model="form.bio" maxlength="200" placeholder="Про мене:" class="custom-textarea"
+                  :disabled="isLoadingData"></textarea>
+
+                <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+                <p v-if="isLoadingData" class="loading-text">Завантаження даних...</p>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button class="btn-primary confirm-btn" @click="saveProfile"
+                :disabled="isLoadingData">Підтвердити</button>
+              <button class="close-btn" @click="openConfirmModal" :disabled="isLoadingData">&times;</button>
+            </div>
+          </div>
+
+          <div v-else-if="isConfirmModalOpen" class="modal confirm-modal">
+            <div class="modal-body confirm-body">
+              <p class="confirm-text">Ви впевнені, що хочете скасувати зміни?</p>
+              <div class="confirm-actions">
+                <button class="btn-primary" @click="cancelChanges">Так</button>
+                <button class="btn-primary" @click="continueEditing">Редагувати далі</button>
+              </div>
+            </div>
+          </div>
+
+        </Transition>
+      </div>
+    </Transition>
+  </div>
+</template>
+
+<style scoped>
 .open-settings-btn {
   background: #E4C1D3;
   border: 2px solid #7E4864;
@@ -226,7 +193,7 @@ const saveProfile = async () => {
   border: 3px solid #7E4864;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   position: relative;
   font-family: 'Montserrat', sans-serif;
 }
@@ -280,7 +247,8 @@ const saveProfile = async () => {
   gap: 15px;
 }
 
-.custom-input, .custom-textarea {
+.custom-input,
+.custom-textarea {
   width: 100%;
   background-color: #F3EDF0;
   border: none;
@@ -289,9 +257,11 @@ const saveProfile = async () => {
   color: #000000;
   box-sizing: border-box;
   font-family: 'Montserrat', sans-serif;
+  font-size: medium;
 }
 
-.custom-input:disabled, .custom-textarea:disabled {
+.custom-input:disabled,
+.custom-textarea:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
@@ -380,10 +350,28 @@ const saveProfile = async () => {
   justify-content: center;
 }
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
 
-.scale-enter-active, .scale-leave-active { transition: all 0.3s ease; }
-.scale-enter-from { opacity: 0; transform: scale(0.95); }
-.scale-leave-to { opacity: 0; transform: scale(1.05); }
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.3s ease;
+}
+
+.scale-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(1.05);
+}
 </style>

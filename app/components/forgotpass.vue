@@ -102,7 +102,7 @@ const handleResetPassword = async () => {
 </script>
 
 <template>
-  <div class="auth-card">
+  <div class="auth-card w-[80%] lg:w-[30vw] mx-auto">
     <div v-if="currentStep === 'forgot'" class="step-container">
       <h3 class="subtitle">Будь ласка, введіть адресу електронної пошти</h3>
       <div class="inputs-group">
@@ -143,15 +143,14 @@ const handleResetPassword = async () => {
   background-color: #EFD6AC;
   padding: 40px;
   border-radius: 32px;
-  width: 450px;
   position: relative;
-  border: 1px solid #61344B;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 .subtitle {
   text-align: center;
   font-size: 15px;
+  font-weight: 600;
   line-height: 1.4;
   margin-bottom: 25px;
   color: #04151F;

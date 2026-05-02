@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import AuthSignup from '~/components/signup.vue'
-import AuthLogin from '~/components/login.vue' 
-import AuthForgotPass from '~/components/forgotpass.vue'
 
 const authMode = ref<'login' | 'signup' | 'forgot'>('signup')
 
@@ -13,20 +10,20 @@ const setMode = (mode: 'login' | 'signup' | 'forgot') => {
 <template>
   <div class="auth-wrapper">
     <Transition name="fade" mode="out-in">
-      <div :key="authMode">
+      <div class="w-full" :key="authMode">
         
-        <AuthSignup 
+        <Signup 
           v-if="authMode === 'signup'" 
           @login="setMode('login')" 
         />
 
-        <AuthLogin 
+        <Login 
           v-else-if="authMode === 'login'" 
           @signup="setMode('signup')" 
           @forgot="setMode('forgot')"
         />
 
-        <AuthForgotPass 
+        <Forgotpass 
           v-else-if="authMode === 'forgot'" 
           @signup="setMode('signup')" 
           @login="setMode('login')" 
@@ -54,10 +51,9 @@ const setMode = (mode: 'login' | 'signup' | 'forgot') => {
 }
 
 .auth-wrapper {
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f5f5f5;
 }
 </style>
