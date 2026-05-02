@@ -15,20 +15,20 @@ defineEmits(['signup', 'forgot']);
 const handleEmailBlur = () => {
   if (!email.value || email.value.trim() === '') {
     emailFieldError.value = 'Введіть свій нікнейм або email';
-    isEmailValid.value = false; 
+    isEmailValid.value = false;
   } else {
-    emailFieldError.value = ''; 
-    isEmailValid.value = true;  
+    emailFieldError.value = '';
+    isEmailValid.value = true;
   }
 };
 
 const handlePasswordBlur = () => {
   if (!password.value || password.value.trim() === '') {
     passwordFieldError.value = 'Введіть свій пароль';
-    isPasswordValid.value = false; 
+    isPasswordValid.value = false;
   } else {
-    passwordFieldError.value = ''; 
-    isPasswordValid.value = true;  
+    passwordFieldError.value = '';
+    isPasswordValid.value = true;
   }
 };
 
@@ -61,23 +61,29 @@ const handleLogin = async () => {
       }
     });
     console.log("Успіх:", response);
-    if (response.token) {
-    tokenCookie.value = response.token; 
-    
-    console.log("Токен успішно збережено в браузері!");
-    
-    navigateTo('/'); 
-  }
+    if (response.token && response.username) {
+      tokenCookie.value = response.token;
+
+      const userNickname = useCookie('user_nickname', {
+        maxAge: 60 * 1440,
+        sameSite: 'lax',
+        secure: config.public.isProd,
+      });
+      userNickname.value = response.username;
+
+      console.log("Токен та нікнейм збережено!");
+      navigateTo('/');
+    }
   } catch (error: any) {
-    
+
     const status = error.status || error.response?.status;
 
     if (error.data?.errors) {
-       errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
+      errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
     } else {
-       errorMessage.value = error.data?.message || "Не вдалося змінити пароль";
+      errorMessage.value = error.data?.message || "Не вдалося змінити пароль";
     }
-    
+
     console.error("Помилка при логіні:", error);
   }
 
@@ -85,7 +91,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="auth-card">
+  <div class="auth-card w-[80%] lg:w-[30vw] mx-auto">
     <div class="sign-up-tag">
     </div>
 
@@ -93,32 +99,22 @@ const handleLogin = async () => {
 
     <div class="inputs-group">
       <div class="input-wrapper">
-        <input 
-          v-model="email" 
-          type="text" 
-          placeholder="Введіть нікнейм або email" 
-          @blur="handleEmailBlur"
+        <input v-model="email" type="text" placeholder="Введіть нікнейм або email" @blur="handleEmailBlur"
           @input="emailFieldError = ''; isEmailValid = false"
-          :class="{ 'valid-field': isEmailValid, 'error-border': emailFieldError }"
-        />
+          :class="{ 'valid-field': isEmailValid, 'error-border': emailFieldError }" />
         <span v-if="emailFieldError" class="error-msg">{{ emailFieldError }}</span>
       </div>
 
       <div class="input-wrapper">
-        <input 
-          v-model="password" 
-          type="password" 
-          placeholder="Пароль" 
-          @blur="handlePasswordBlur"
+        <input v-model="password" type="password" placeholder="Пароль" @blur="handlePasswordBlur"
           @input="passwordFieldError = ''; isPasswordValid = false"
-          :class="{ 'valid-field': isPasswordValid, 'error-border': passwordFieldError }"
-        />
+          :class="{ 'valid-field': isPasswordValid, 'error-border': passwordFieldError }" />
         <span v-if="passwordFieldError" class="error-msg">{{ passwordFieldError }}</span>
       </div>
     </div>
-    
+
     <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-    
+
     <div class="forgot-password">
       <button @click="$emit('forgot')">Забув(</button>
     </div>
@@ -136,7 +132,6 @@ const handleLogin = async () => {
   background-color: #EFD6AC;
   padding: 40px;
   border-radius: 32px;
-  width: 450px;
   position: relative;
 }
 
@@ -182,8 +177,8 @@ input {
   transition: border-color 0.2s;
 }
 
-.valid-field{
-  border-color :#4CAF50 !important;
+.valid-field {
+  border-color: #4CAF50 !important;
 }
 
 .error-border {
@@ -196,6 +191,7 @@ input {
   margin-top: -10px;
   margin-left: 12px;
 }
+
 .error-text {
   color: #d9534f;
   background-color: #fce8e8;
@@ -206,7 +202,8 @@ input {
   margin-top: 15px;
   border: 1px solid #d9534f;
 }
-.forgot-password { 
+
+.forgot-password {
   margin-top: 15px;
   text-align: left;
 }
@@ -230,7 +227,7 @@ input {
   border-radius: 24px;
   border: none;
   font-weight: bold;
-  margin-top: 20px; 
+  margin-top: 20px;
   cursor: pointer;
 }
 

@@ -68,7 +68,7 @@ const handleSignup = async () => {
 </script>
 
 <template>
-  <div class="auth-card">
+  <div class="auth-card w-[80%] lg:w-[30vw] mx-auto">
     <div class="sign-up-tag"></div>
 
     <h1 class="title">ВІТАЮ!</h1>
@@ -108,7 +108,6 @@ const handleSignup = async () => {
   background-color: #EFD6AC;
   padding: 40px;
   border-radius: 32px;
-  width: 450px;
   position: relative;
   box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
