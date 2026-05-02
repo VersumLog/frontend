@@ -68,7 +68,7 @@ const emit = defineEmits(['edit', 'refresh-data']);
             </p>
 
             <changeprofile v-if="isOwnProfile" :user-data="userData" @profile-updated="$emit('refresh-data')"
-              class="absolute bottom-4 right-4 md:bottom-6 md:right-6 bg-[#CBA3B3] w-[50px] h-[50px] md:w-[55px] md:h-[55px] rounded-full flex items-center justify-center text-2xl shadow-md hover:scale-105 transition-transform">
+              class="absolute bottom-4 right-4 md:bottom-6 ">
             </changeprofile>
           </div>
         </div>
@@ -102,7 +102,6 @@ const emit = defineEmits(['edit', 'refresh-data']);
 </template>
 
 <style scoped>
-/* Залишаємо специфічні стилі кнопки, які складно або громіздко писати через класи Tailwind */
 .teal-btn {
   background-color: #43A08E;
   color: white;
