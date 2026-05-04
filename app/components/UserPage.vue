@@ -10,6 +10,7 @@ interface UserProfile {
   name: string;
   bio: string;
   createdAt: string;
+  isAuthor: boolean;
   isOwner: boolean;
 }
 
@@ -18,7 +19,8 @@ const props = defineProps<{
 }>();
 
 const isOwnProfile = computed(() => props.userData?.isOwner ?? false);
-const isAuthor = ref(false);
+const isAuthorProfile = computed(() => props.userData?.isAuthor ?? false);
+
 const activeTab = ref('Збережене');
 
 const emit = defineEmits(['edit', 'refresh-data']);
@@ -60,7 +62,7 @@ const emit = defineEmits(['edit', 'refresh-data']);
 
             <div class="w-full sm:w-auto">
               <template v-if="isOwnProfile">
-                <become_author v-if="!isAuthor" class="w-full sm:w-auto" />
+                <become_author v-if="!isAuthorProfile" class="w-full sm:w-auto" />
                 <button v-else class="teal-btn w-full sm:w-auto">Створити твір</button>
               </template>
             </div>
@@ -78,7 +80,7 @@ const emit = defineEmits(['edit', 'refresh-data']);
               class="absolute bottom-4 right-4 md:bottom-6 ">
             </changeprofile>
           </div>
-          <author_badge v-if="isAuthor" :username="userData.username" />
+          <author_badge v-if="isAuthorProfile" :username="userData.username" />
         </div>
       </div>
 
