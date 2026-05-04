@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import BecomeAuthor from './become_author.vue';
+import AuthorBadge from './author_badge.vue';
+import DeleteAccount from './deleteAccount.vue';
+
 
 interface UserProfile {
   username: string;
@@ -18,6 +22,9 @@ const isAuthor = ref(false);
 const activeTab = ref('Збережене');
 
 const emit = defineEmits(['edit', 'refresh-data']);
+
+
+
 </script>
 
 <template>
@@ -53,7 +60,7 @@ const emit = defineEmits(['edit', 'refresh-data']);
 
             <div class="w-full sm:w-auto">
               <template v-if="isOwnProfile">
-                <button v-if="!isAuthor" class="teal-btn w-full sm:w-auto">Стати автором</button>
+                <become_author v-if="!isAuthor" class="w-full sm:w-auto" />
                 <button v-else class="teal-btn w-full sm:w-auto">Створити твір</button>
               </template>
             </div>
@@ -71,6 +78,7 @@ const emit = defineEmits(['edit', 'refresh-data']);
               class="absolute bottom-4 right-4 md:bottom-6 ">
             </changeprofile>
           </div>
+          <author_badge v-if="isAuthor" :username="userData.username" />
         </div>
       </div>
 
@@ -84,11 +92,9 @@ const emit = defineEmits(['edit', 'refresh-data']);
         </div>
       </div>
 
-      <!-- Footer Actions -->
+<!-- Footer Actions -->
       <div v-if="isOwnProfile" class="mt-16 md:mt-20 mb-10 text-center">
-        <button class="text-[#744458] underline text-lg font-medium hover:text-red-700 transition-colors">
-          Видалити акаунт
-        </button>
+        <deleteAccount />
       </div>
       <div v-if="isOwnProfile">
         <button @click="useAuth().logout()">Вийти</button>
