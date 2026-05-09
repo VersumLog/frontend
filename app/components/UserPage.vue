@@ -81,7 +81,10 @@ const emit = defineEmits(['edit', 'refresh-data']);
 
       <!-- Content Section -->
       <div class="mt-12 md:mt-16">
-        <Writings :username="userData.username" />
+        <Writings 
+          :username="userData.username"
+          :is-owner="userData.isOwner"
+/>
       </div>
 
 <!-- Footer Actions -->
