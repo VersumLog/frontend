@@ -37,10 +37,20 @@ const emit = defineEmits(['edit', 'refresh-data']);
       <div class="flex flex-col md:flex-row gap-8 md:gap-[60px] items-center md:items-start">
 
         <!-- Left Column: Avatar & Names -->
+        
         <div class="w-full md:w-[220px] flex flex-col items-center text-center">
+          <div class="relative mb-5">
           <div
-            class="w-[180px] h-[180px] md:w-[220px] md:h-[220px] bg-white rounded-full flex items-center justify-center shadow-lg mb-5">
-            <span class="text-[80px] md:text-[100px]">👤</span>
+              class="w-[180px] h-[180px] md:w-[220px] md:h-[220px] bg-white rounded-full flex items-center justify-center shadow-lg mb-5">
+              <span class="text-[80px] md:text-[100px]">👤</span>
+          </div>
+          <div class="absolute bottom-2 right-6 md:bottom-4 md:right-6">
+              <author_badge v-if="isAuthorProfile" 
+                :username="userData.username" 
+                :is-owner="isOwnProfile"
+              
+              />
+          </div>
           </div>
           <div class="space-y-1">
             <h2 class="text-2xl md:text-[32px] font-black leading-tight">{{ userData?.name }}</h2>
@@ -80,7 +90,7 @@ const emit = defineEmits(['edit', 'refresh-data']);
               class="absolute bottom-4 right-4 md:bottom-6 ">
             </changeprofile>
           </div>
-          <author_badge v-if="isAuthorProfile" :username="userData.username" />
+          
         </div>
       </div>
 

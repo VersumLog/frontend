@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+
+const emit = defineEmits(['author-created'])
 const errorMessage = ref('');
 
 const isFormModalOpen = ref(false)
@@ -25,14 +27,15 @@ const submitForm = async () => {
       headers: {
         'Authorization': token ? `Bearer ${token}` : ''
       },
-      body: {
-        authorBio: authorText.value.trim() 
-      }
+    
+      body: authorText.value.trim() 
     });
 
     isFormModalOpen.value = false;
     isSuccessModalOpen.value = true;
     authorText.value = ''; 
+    
+    emit('author-created');
 
   } catch (error: any) {
     console.error('Помилка при відправці заявки:', error);
