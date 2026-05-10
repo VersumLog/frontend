@@ -77,6 +77,10 @@ const activeTab = ref('Збережене');
             <p class="text-base md:text-xl leading-relaxed text-[#04151F] break-all sm:break-words whitespace-normal">
               {{ userData.bio }}
             </p>
+
+            <changeprofile v-if="isOwnProfile" :user-data="userData" @profile-updated="$emit('refresh-data')"
+              class="absolute bottom-4 right-4 md:bottom-6 ">
+            </changeprofile>
           </div>
           
         </div>
@@ -92,6 +96,10 @@ const activeTab = ref('Збережене');
 
       <div v-if="isOwnProfile" class="mt-16 md:mt-20 mb-10 text-center">
         <deleteAccount />
+      </div>
+      
+      <div v-if="isOwnProfile">
+        <button @click="useAuth().logout()">Вийти</button>
       </div>
     </main>
   </div>
