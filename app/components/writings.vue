@@ -21,96 +21,19 @@
       </div>
       
       <div class="sort-container">
-        <button class="sort-trigger" @click="isSortMenuOpen = true">
-          Сортувати
-        </button>
-
-        <transition name="slide-fade">
-          <div v-if="isSortMenuOpen" class="sort-menu" @click.stop>
-            <button class="close-btn" @click="isSortMenuOpen = false" title="Закрити меню">
-              <svg viewBox="0 0 24 24" class="close-icon">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
-              </svg>
-            </button>
-
-            <h4 class="sort-title">Сортувати за:</h4>
-
-            <ul class="sort-options">
-              <li @click="sortBy = 'Title'">
-                <span :class="['radio-circle', { active: sortBy === 'Title' }]"></span>
-                Назвою
-              </li>
-              <li @click="sortBy = 'Description'">
-                <span :class="['radio-circle', { active: sortBy === 'Description' }]"></span>
-                Описом
-              </li>
-              <li @click="sortBy = 'CreatedAt'">
-                <span :class="['radio-circle', { active: sortBy === 'CreatedAt' }]"></span>
-                Датою
-              </li>
-            </ul>
-            
-            <button class="sort-order-btn" @click="sortDesc = !sortDesc" title="Змінити напрямок">
-              <svg v-if="!sortDesc" viewBox="0 0 24 24" class="sort-icon">
-                <path d="M4 18h4v-2H4v2zm0-5h8v-2H4v2zm0-7v2h12V6H4zm15 8v-4h-2v4h-3l4 4 4-4h-3z" fill="currentColor"/>
-              </svg>
-              <svg v-else viewBox="0 0 24 24" class="sort-icon">
-                <path d="M4 18h4v-2H4v2zm0-5h8v-2H4v2zm0-7v2h12V6H4zm14 8h3l-4-4-4 4h3v4h2v-4z" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
-        </transition>
-      </div>
+        <button class="sort-trigger" @click="isSortMenuOpen = true">Сортувати</button>
+        </div>
     </div>
 
-    <transition name="fade">
-      <div
-        v-if="isSortMenuOpen"
-        class="sort-overlay"
-        @click="isSortMenuOpen = false"
-      ></div>
-    </transition>
-
     <div v-if="activeTab === 'works'" class="scrollable-list">
-      <div v-if="isLoading" class="loading-state">
-        Завантаження творів...
-      </div>
-
-      <div v-else-if="works.length === 0" class="loading-state">
-        Творів не знайдено.
-      </div>
-
-      <div
-        v-else
-        v-for="work in works"
-        :key="work.postId || work.id"
-        class="work-card"
-      >
-        <div class="card-center">
-          <h3 class="work-title">{{ work.title }}</h3>
-          <span class="work-genre">
-            {{ work.genres?.[0]?.name || 'Жанр' }}
-          </span>
+      <div v-if="isLoading" class="loading-state">Завантаження...</div>
+      <div v-else-if="works.length === 0" class="loading-state">Творів не знайдено.</div>
+      <div v-else v-for="work in works" :key="work.postId" class="work-card">
         </div>
-
-        <div class="work-stats">
-          <span>{{ work.likes || 0 }} лайків</span>
-          <span class="stats-spacing">
-            {{ work.comments || 0 }} коментарів
-          </span>
-        </div>
-
-        <button class="action-btn">
-          Читати
-        </button>
-      </div>
     </div>
 
     <div v-else>
-      <Drafts
-        :sort-by="sortBy"
-        :sort-desc="sortDesc"
-      />
+      <Drafts :sort-by="sortBy" :sort-desc="sortDesc" />
     </div>
   </div>
 </template>
@@ -120,72 +43,37 @@ import { ref, watch } from 'vue'
 import Drafts from './drafts.vue'
 
 const props = defineProps({
-  username: {
-    type: String,
-    required: true
-  },
-  isOwner: {
-    type: Boolean,
-    default: false
-  },
-  isAuthor: {
-    type: Boolean,
-    default: false
-  }
+  username: { type: String, required: true },
+  isOwner: { type: Boolean, default: false },
+  isAuthor: { type: Boolean, default: false } 
 })
 
 const activeTab = ref('works')
-const isSortMenuOpen = ref(false)
-const sortBy = ref('Title')
-const sortDesc = ref(false)
 const works = ref([])
 const isLoading = ref(false)
-
-watch(() => props.isOwner, (value) => {
-  if (!value && activeTab.value === 'drafts') {
-    activeTab.value = 'works'
-  }
-})
+const sortBy = ref('Title')
+const sortDesc = ref(false)
+const isSortMenuOpen = ref(false)
 
 const fetchPosts = async () => {
+  if (!props.isAuthor) return 
   isLoading.value = true
-
   try {
-    const isAscending = !sortDesc.value
     const baseUrl = import.meta.env.VITE_API_URL || 'https://localhost:7014'
-
     const queryParams = new URLSearchParams({
       Username: props.username,
       Filter: sortBy.value,
-      Ascending: isAscending
+      Ascending: !sortDesc.value
     }).toString()
-
-    const response = await fetch(
-      `${baseUrl}/api/Posts/get-posts?${queryParams}`
-    )
-
-    if (response.ok) {
-      works.value = await response.json()
-    } else {
-      console.error('Помилка завантаження творів')
-      works.value = []
-    }
-  } catch (error) {
-    console.error('Мережева помилка:', error)
-  } finally {
-    isLoading.value = false
-  }
+    const response = await fetch(`${baseUrl}/api/Posts/get-posts?${queryParams}`)
+    if (response.ok) works.value = await response.json()
+  } catch (e) { console.error(e) }
+  finally { isLoading.value = false }
 }
 
-watch(
-  [activeTab, sortBy, sortDesc],
-  () => {
-    if (activeTab.value === 'works') {
-      fetchPosts()
-    }
-  },
-  { immediate: true }
-)
+watch([activeTab, sortBy, sortDesc], () => {
+  if (activeTab.value === 'works') fetchPosts()
+}, { immediate: true })
 </script>
 
 <style scoped>

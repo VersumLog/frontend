@@ -11,6 +11,7 @@ interface UserProfile {
   bio: string;
   createdAt: string;
   isOwner: boolean;
+  isAuthor: boolean; 
 }
 
 const props = defineProps<{
@@ -18,7 +19,10 @@ const props = defineProps<{
 }>();
 
 const isOwnProfile = computed(() => props.userData?.isOwner ?? false);
-const isAuthor = ref(false);
+
+// 2. Тепер беремо статус автора безпосередньо з даних бекенду
+const isAuthor = computed(() => props.userData?.isAuthor ?? false);
+
 const activeTab = ref('Збережене');
 
 const emit = defineEmits(['edit', 'refresh-data']);
@@ -28,13 +32,9 @@ const emit = defineEmits(['edit', 'refresh-data']);
   <div v-if="userData" class="min-h-screen bg-[#FDE9D1] text-[#04151F] font-sans">
     <main class="mx-auto max-w-[1300px] px-4 py-8 md:py-[60px]">
 
-      <!-- Header Section -->
       <div class="flex flex-col md:flex-row gap-8 md:gap-[60px] items-center md:items-start">
-
-        <!-- Left Column: Avatar & Names -->
         <div class="w-full md:w-[220px] flex flex-col items-center text-center">
-          <div
-            class="w-[180px] h-[180px] md:w-[220px] md:h-[220px] bg-white rounded-full flex items-center justify-center shadow-lg mb-5">
+          <div class="w-[180px] h-[180px] md:w-[220px] md:h-[220px] bg-white rounded-full flex items-center justify-center shadow-lg mb-5">
             <span class="text-[80px] md:text-[100px]">👤</span>
           </div>
           <div class="space-y-1">
@@ -43,16 +43,11 @@ const emit = defineEmits(['edit', 'refresh-data']);
           </div>
         </div>
 
-        <!-- Right Column: Stats, Actions & Bio -->
         <div class="flex-1 w-full flex flex-col gap-6 md:gap-8">
-
-          <!-- Stats & Actions Row -->
           <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-2">
             <div class="flex gap-6 md:gap-10 text-xl md:text-2xl font-medium">
-              <div class="whitespace-nowrap">Підписок <strong class="font-black text-2xl md:text-[26px]">2</strong>
-              </div>
-              <div class="whitespace-nowrap">Підписників <strong class="font-black text-2xl md:text-[26px]">22</strong>
-              </div>
+              <div class="whitespace-nowrap">Підписок <strong class="font-black text-2xl md:text-[26px]">2</strong></div>
+              <div class="whitespace-nowrap">Підписників <strong class="font-black text-2xl md:text-[26px]">22</strong></div>
             </div>
 
             <div class="w-full sm:w-auto">
@@ -63,43 +58,28 @@ const emit = defineEmits(['edit', 'refresh-data']);
             </div>
           </div>
 
-          <!-- Bio Card -->
-          <div
-            class="relative bg-[#FFE6B7] p-6 md:p-10 rounded-[30px] md:rounded-[40px] min-h-[150px] md:min-h-[180px] shadow-sm">
+          <div class="relative bg-[#FFE6B7] p-6 md:p-10 rounded-[30px] md:rounded-[40px] min-h-[150px] md:min-h-[180px] shadow-sm">
             <span class="block font-extrabold text-xl md:text-24px mb-3 uppercase tracking-wide">Про мене:</span>
             <p class="text-base md:text-xl leading-relaxed text-[#04151F] break-all sm:break-words whitespace-normal">
               {{ userData.bio }}
             </p>
-
-            <changeprofile v-if="isOwnProfile" :user-data="userData" @profile-updated="$emit('refresh-data')"
-              class="absolute bottom-4 right-4 md:bottom-6 ">
-            </changeprofile>
           </div>
           <author_badge v-if="isAuthor" :username="userData.username" />
         </div>
       </div>
 
-      <!-- Content Section -->
       <div class="mt-12 md:mt-16">
         <Writings 
           :username="userData.username"
           :is-owner="userData.isOwner"
           :is-author="isAuthor"
-/>
+        />
       </div>
 
-<!-- Footer Actions -->
       <div v-if="isOwnProfile" class="mt-16 md:mt-20 mb-10 text-center">
         <deleteAccount />
       </div>
-      <div v-if="isOwnProfile">
-        <button @click="useAuth().logout()">Вийти</button>
-      </div>
     </main>
-  </div>
-
-  <div v-else class="flex items-center justify-center min-h-screen bg-[#FDE9D1]">
-    <p class="text-xl font-bold animate-pulse">Завантаження профілю...</p>
   </div>
 </template>
 
