@@ -1,5 +1,5 @@
 <template>
-  <div class="works-container">
+  <div v-if="props.isAuthor" class="works-container">
     <div class="header-wrapper">
       <div class="tabs-nav">
         <button 
@@ -27,7 +27,6 @@
 
         <transition name="slide-fade">
           <div v-if="isSortMenuOpen" class="sort-menu" @click.stop>
-            
             <button class="close-btn" @click="isSortMenuOpen = false" title="Закрити меню">
               <svg viewBox="0 0 24 24" class="close-icon">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
@@ -41,12 +40,10 @@
                 <span :class="['radio-circle', { active: sortBy === 'Title' }]"></span>
                 Назвою
               </li>
-
               <li @click="sortBy = 'Description'">
                 <span :class="['radio-circle', { active: sortBy === 'Description' }]"></span>
                 Описом
               </li>
-
               <li @click="sortBy = 'CreatedAt'">
                 <span :class="['radio-circle', { active: sortBy === 'CreatedAt' }]"></span>
                 Датою
@@ -57,7 +54,6 @@
               <svg v-if="!sortDesc" viewBox="0 0 24 24" class="sort-icon">
                 <path d="M4 18h4v-2H4v2zm0-5h8v-2H4v2zm0-7v2h12V6H4zm15 8v-4h-2v4h-3l4 4 4-4h-3z" fill="currentColor"/>
               </svg>
-
               <svg v-else viewBox="0 0 24 24" class="sort-icon">
                 <path d="M4 18h4v-2H4v2zm0-5h8v-2H4v2zm0-7v2h12V6H4zm14 8h3l-4-4-4 4h3v4h2v-4z" fill="currentColor"/>
               </svg>
@@ -75,7 +71,6 @@
       ></div>
     </transition>
 
-    <!-- Список творів -->
     <div v-if="activeTab === 'works'" class="scrollable-list">
       <div v-if="isLoading" class="loading-state">
         Завантаження творів...
@@ -93,7 +88,6 @@
       >
         <div class="card-center">
           <h3 class="work-title">{{ work.title }}</h3>
-
           <span class="work-genre">
             {{ work.genres?.[0]?.name || 'Жанр' }}
           </span>
@@ -101,7 +95,6 @@
 
         <div class="work-stats">
           <span>{{ work.likes || 0 }} лайків</span>
-
           <span class="stats-spacing">
             {{ work.comments || 0 }} коментарів
           </span>
@@ -113,7 +106,6 @@
       </div>
     </div>
 
-    <!-- Список чернеток -->
     <div v-else>
       <Drafts
         :sort-by="sortBy"
@@ -132,19 +124,20 @@ const props = defineProps({
     type: String,
     required: true
   },
-
   isOwner: {
+    type: Boolean,
+    default: false
+  },
+  isAuthor: {
     type: Boolean,
     default: false
   }
 })
 
 const activeTab = ref('works')
-
 const isSortMenuOpen = ref(false)
 const sortBy = ref('Title')
 const sortDesc = ref(false)
-
 const works = ref([])
 const isLoading = ref(false)
 
@@ -159,9 +152,7 @@ const fetchPosts = async () => {
 
   try {
     const isAscending = !sortDesc.value
-
-    const baseUrl =
-      import.meta.env.VITE_API_URL || 'https://localhost:7014'
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://localhost:7014'
 
     const queryParams = new URLSearchParams({
       Username: props.username,

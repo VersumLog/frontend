@@ -84,6 +84,7 @@ const emit = defineEmits(['edit', 'refresh-data']);
         <Writings 
           :username="userData.username"
           :is-owner="userData.isOwner"
+          :is-author="isAuthor"
 />
       </div>
 

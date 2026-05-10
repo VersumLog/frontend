@@ -22,11 +22,13 @@ describe('Writings.vue', () => {
     vi.restoreAllMocks()
   })
 
-  const createWrapper = (isOwner = false) => {
+  //isAuthor за замовчуванням true, щоб інші тести не ламалися
+  const createWrapper = (isOwner = false, isAuthor = true) => {
     return mount(Writings, {
       props: {
         username: 'Sofiydes',
-        isOwner
+        isOwner,
+        isAuthor
       },
       global: {
         stubs: {
@@ -73,8 +75,8 @@ describe('Writings.vue', () => {
     expect(wrapper.text()).toContain('Творів не знайдено.')
   })
 
-  it('перемикає на вкладку "Чернетки" тільки для власника', async () => {
-    const wrapper = createWrapper(true)
+  it('перемикає на вкладку "Чернетки" тільки для власника-автора', async () => {
+    const wrapper = createWrapper(true, true) // isOwner = true, isAuthor = true
     await flushPromises()
 
     const tabs = wrapper.findAll('.tab-btn')
@@ -87,13 +89,22 @@ describe('Writings.vue', () => {
     expect(wrapper.findComponent({ name: 'Drafts' }).exists()).toBe(true)
   })
 
-  it('не показує вкладку "Чернетки" якщо не owner', async () => {
-    const wrapper = createWrapper(false)
+  it('не показує вкладку "Чернетки" якщо автор, але не owner', async () => {
+    const wrapper = createWrapper(false, true) // isOwner = false, isAuthor = true
     await flushPromises()
 
     const tabs = wrapper.findAll('.tab-btn')
 
     expect(tabs.length).toBe(1)
     expect(wrapper.findComponent({ name: 'Drafts' }).exists()).toBe(false)
+  })
+
+  it('взагалі нічого не відображає, якщо користувач не є автором (навіть якщо owner)', async () => {
+    const wrapper = createWrapper(true, false) // isOwner = true, isAuthor = false
+    await flushPromises()
+
+    const container = wrapper.find('.works-container')
+    
+    expect(container.exists()).toBe(false)
   })
 })
