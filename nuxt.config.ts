@@ -16,5 +16,9 @@ export default defineNuxtConfig({
   app: {
     pageTransition: { name: 'page', mode: 'out-in' }
   },
-  modules: ['@nuxtjs/tailwindcss', '@nuxt/icon']
+  modules: [
+    '@nuxtjs/tailwindcss', 
+    '@nuxt/icon',
+    '@nuxt/test-utils/module' // <-- Додали цей рядок
+  ]
 })
