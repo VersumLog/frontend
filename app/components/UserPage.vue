@@ -12,7 +12,6 @@ interface UserProfile {
   createdAt: string;
   isAuthor: boolean;
   isOwner: boolean;
-  isAuthor: boolean; 
 }
 
 const props = defineProps<{
@@ -22,15 +21,12 @@ const props = defineProps<{
 const isOwnProfile = computed(() => props.userData?.isOwner ?? false);
 const isAuthorProfile = computed(() => props.userData?.isAuthor ?? false);
 
-const activeTab = ref('Збережене');
-
 const emit = defineEmits(['edit', 'refresh-data']);
 
 const isAuthor = computed(() => props.userData?.isAuthor ?? false);
 
 const activeTab = ref('Збережене');
 
-const emit = defineEmits(['edit', 'refresh-data']);
 </script>
 
 <template>
