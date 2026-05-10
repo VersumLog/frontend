@@ -9,32 +9,128 @@
           Твори
         </button>
 
-        <span v-if="props.isOwner" class="divider">|</span>
-
-        <button 
-          v-if="props.isOwner"
-          :class="['tab-btn', { active: activeTab === 'drafts' }]"
-          @click="activeTab = 'drafts'"
-        >
-          Чернетки
-        </button>
+        <template v-if="props.isOwner">
+          <span class="divider">|</span>
+          <button 
+            :class="['tab-btn', { active: activeTab === 'drafts' }]"
+            @click="activeTab = 'drafts'"
+          >
+            Чернетки
+          </button>
+        </template>
       </div>
       
       <div class="sort-container">
-        <button class="sort-trigger" @click="isSortMenuOpen = true">Сортувати</button>
-        </div>
+        <button class="sort-trigger" @click="isSortMenuOpen = true">
+          Сортувати
+        </button>
+
+        <transition name="fade">
+          <div 
+            v-if="isSortMenuOpen" 
+            class="sort-overlay" 
+            @click="isSortMenuOpen = false"
+          ></div>
+        </transition>
+
+        <transition name="slide-fade">
+          <div v-if="isSortMenuOpen" class="sort-menu" @click.stop>
+            <button
+              class="close-btn"
+              @click="isSortMenuOpen = false"
+              title="Закрити меню"
+            >
+              <svg viewBox="0 0 24 24" class="close-icon">
+                <path
+                  d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+
+            <h4 class="sort-title">Сортувати за:</h4>
+
+            <ul class="sort-options">
+              <li @click="sortBy = 'Title'">
+                <span
+                  :class="['radio-circle', { active: sortBy === 'Title' }]"
+                ></span>
+                Назвою
+              </li>
+
+              <li @click="sortBy = 'Description'">
+                <span
+                  :class="['radio-circle', { active: sortBy === 'Description' }]"
+                ></span>
+                Описом
+              </li>
+
+              <li @click="sortBy = 'CreatedAt'">
+                <span
+                  :class="['radio-circle', { active: sortBy === 'CreatedAt' }]"
+                ></span>
+                Датою
+              </li>
+            </ul>
+
+            <button
+              class="sort-order-btn"
+              @click="sortDesc = !sortDesc"
+              title="Змінити напрямок"
+            >
+              <svg v-if="!sortDesc" viewBox="0 0 24 24" class="sort-icon">
+                <path
+                  d="M4 18h4v-2H4v2zm0-5h8v-2H4v2zm0-7v2h12V6H4zm15 8v-4h-2v4h-3l4 4 4-4h-3z"
+                  fill="currentColor"
+                />
+              </svg>
+
+              <svg v-else viewBox="0 0 24 24" class="sort-icon">
+                <path
+                  d="M4 18h4v-2H4v2zm0-5h8v-2H4v2zm0-7v2h12V6H4zm14 8h3l-4-4-4 4h3v4h2v-4z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+          </div>
+        </transition>
+      </div>
     </div>
 
-    <div v-if="activeTab === 'works'" class="scrollable-list">
-      <div v-if="isLoading" class="loading-state">Завантаження...</div>
-      <div v-else-if="works.length === 0" class="loading-state">Творів не знайдено.</div>
-      <div v-else v-for="work in works" :key="work.postId" class="work-card">
-        </div>
-    </div>
+    <transition name="fade" mode="out-in">
+      <div v-if="activeTab === 'works'" key="works" class="scrollable-list">
+        
+        <div v-if="isLoading && works.length === 0" class="loading-state">Завантаження творів...</div>
+        <div v-else-if="!isLoading && works.length === 0" class="loading-state">Творів не знайдено.</div>
+        
+        <transition-group 
+          v-else 
+          name="list" 
+          tag="div" 
+          class="works-list-wrapper"
+          :class="{ 'is-fetching': isLoading }"
+        >
+          <div v-for="work in works" :key="work.postId" class="work-card">
+            <div class="card-center">
+              <h3 class="work-title">{{ work.title }}</h3>
+              <span class="work-genre">{{ work.genres?.[0]?.name || 'Жанр' }}</span>
+            </div>
 
-    <div v-else>
-      <Drafts :sort-by="sortBy" :sort-desc="sortDesc" />
-    </div>
+            <div class="work-stats">
+              <span>{{ work.likesCount || 0 }} лайків</span>
+              <span>{{ work.commentsCount || 0 }} коментів</span>
+            </div>
+
+            <button class="action-btn">Читати</button>
+          </div>
+        </transition-group>
+
+      </div>
+
+      <div v-else-if="activeTab === 'drafts' && props.isOwner" key="drafts">
+        <Drafts :sort-by="sortBy" :sort-desc="sortDesc" />
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -48,6 +144,7 @@ const props = defineProps({
   isAuthor: { type: Boolean, default: false } 
 })
 
+const config = useRuntimeConfig()
 const activeTab = ref('works')
 const works = ref([])
 const isLoading = ref(false)
@@ -59,16 +156,23 @@ const fetchPosts = async () => {
   if (!props.isAuthor) return 
   isLoading.value = true
   try {
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://localhost:7014'
-    const queryParams = new URLSearchParams({
-      Username: props.username,
-      Filter: sortBy.value,
-      Ascending: !sortDesc.value
-    }).toString()
-    const response = await fetch(`${baseUrl}/api/Posts/get-posts?${queryParams}`)
-    if (response.ok) works.value = await response.json()
-  } catch (e) { console.error(e) }
-  finally { isLoading.value = false }
+    const baseUrl = config.public.apiBase || 'https://localhost:7014'
+    
+    const data = await $fetch(`${baseUrl}/api/Posts/get-posts`, {
+      method: 'GET',
+      params: {
+        Username: props.username,
+        Filter: sortBy.value,
+        Ascending: !sortDesc.value
+      }
+    })
+    works.value = data
+  } catch (e) { 
+    console.error("Помилка завантаження творів:", e) 
+    works.value = []
+  } finally { 
+    isLoading.value = false 
+  }
 }
 
 watch([activeTab, sortBy, sortDesc], () => {
@@ -123,8 +227,10 @@ watch([activeTab, sortBy, sortDesc], () => {
 .sort-container {
   position: absolute;
   right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
   z-index: 1001; 
 }
 
@@ -142,18 +248,21 @@ watch([activeTab, sortBy, sortDesc], () => {
 .sort-overlay {
   position: fixed;
   top: 0;
+  right: 0;
+  bottom: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.4); 
   z-index: 1000; 
+  cursor: pointer; 
 }
 
 .sort-menu {
   position: absolute;
   top: 100%;
   right: 0;
-  margin-top: 15px;
+  margin-top: 5px;
   background-color: #E4C1D3; 
   border: 4px solid #2A7064; 
   border-radius: 12px;
@@ -161,6 +270,7 @@ watch([activeTab, sortBy, sortDesc], () => {
   min-width: 260px;
   color: white;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  z-index: 1002; 
 }
 
 .close-btn {
@@ -241,20 +351,21 @@ watch([activeTab, sortBy, sortDesc], () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
+  width: 40px; 
+  height: 40px; 
+  padding: 0; 
   color: #000; 
 }
 
 .sort-icon {
   width: 28px;
   height: 28px;
+  flex-shrink: 0; 
 }
 
-.fade-enter-active {
-  transition: opacity 0.3s ease;
-}
+.fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 .fade-enter-from,
 .fade-leave-to {
@@ -289,6 +400,37 @@ watch([activeTab, sortBy, sortDesc], () => {
   font-size: 16px;
   color: #4A3A41;
   padding: 20px 0;
+}
+
+.works-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+  width: 100%;
+}
+
+.is-fetching {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.list-move,
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+
+.list-leave-active {
+  position: absolute;
+  width: 100%;
 }
 
 .work-card {

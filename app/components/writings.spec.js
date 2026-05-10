@@ -1,24 +1,24 @@
 import { mount, flushPromises } from '@vue/test-utils'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import Writings from './writings.vue'
+import Writings from './writings.vue' 
 
 describe('Writings.vue', () => {
   const mockWorks = [
-    { postId: 1, title: 'ТВІР 1', genres: [{ name: 'Драма' }], likes: 10, comments: 2 },
-    { postId: 2, title: 'ТВІР 2', genres: [{ name: 'Комедія' }], likes: 5, comments: 0 },
-    { postId: 3, title: 'ТВІР 3', genres: [{ name: 'Фентезі' }], likes: 20, comments: 5 }
+    { postId: 1, title: 'ТВІР 1', genres: [{ name: 'Драма' }], likesCount: 10, commentsCount: 2 },
+    { postId: 2, title: 'ТВІР 2', genres: [{ name: 'Комедія' }], likesCount: 5, commentsCount: 0 },
+    { postId: 3, title: 'ТВІР 3', genres: [{ name: 'Фентезі' }], likesCount: 20, commentsCount: 5 }
   ]
 
   beforeEach(() => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(mockWorks)
-      })
-    )
+    vi.stubGlobal('$fetch', vi.fn(() => Promise.resolve(mockWorks)))
+    
+    vi.stubGlobal('useRuntimeConfig', vi.fn(() => ({
+      public: { apiBase: 'https://localhost:7014' }
+    })))
   })
 
   afterEach(() => {
+    vi.unstubAllGlobals()
     vi.restoreAllMocks()
   })
 
@@ -31,7 +31,6 @@ describe('Writings.vue', () => {
       },
       global: {
         stubs: {
-          // Це створить фейковий тег <drafts-stub></drafts-stub> у віртуальному DOM
           Drafts: true 
         }
       }
@@ -45,33 +44,36 @@ describe('Writings.vue', () => {
     const tabs = wrapper.findAll('.tab-btn')
     expect(tabs[0].classes()).toContain('active')
     
-    // Перевіряємо, що зрендерилися картки, не прив'язуючись до їхнього тексту
     const cards = wrapper.findAll('.work-card')
     expect(cards.length).toBeGreaterThan(0)
   })
 
-  it('показує loading стан', () => {
+  it('показує loading стан', async () => {
+    let resolveFetch;
+    vi.stubGlobal('$fetch', vi.fn(() => new Promise(resolve => {
+       resolveFetch = resolve;
+    })))
+
     const wrapper = createWrapper()
-    // Текст точно збігається з твоїм: "Завантаження..."
-    expect(wrapper.text()).toContain('Завантаження...')
+    
+    expect(wrapper.text()).toContain('Завантаження творів...')
+    
+    resolveFetch(mockWorks)
+    await flushPromises()
   })
 
   it('рендерить список творів після завантаження', async () => {
     const wrapper = createWrapper()
     await flushPromises()
 
-    // Рахуємо кількість зрендерених div з класом work-card
     const cards = wrapper.findAll('.work-card')
     expect(cards.length).toBe(3)
+    
+    expect(wrapper.text()).toContain('ТВІР 1')
   })
 
   it('показує повідомлення якщо творів немає', async () => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([])
-      })
-    )
+    vi.stubGlobal('$fetch', vi.fn(() => Promise.resolve([])))
 
     const wrapper = createWrapper()
     await flushPromises()
@@ -90,7 +92,6 @@ describe('Writings.vue', () => {
 
     expect(tabs[1].classes()).toContain('active')
     
-    // НАЙНАДІЙНІШИЙ спосіб знайти стаб у Vue Test Utils
     expect(wrapper.find('drafts-stub').exists()).toBe(true)
   })
 
@@ -99,7 +100,7 @@ describe('Writings.vue', () => {
     await flushPromises()
 
     const tabs = wrapper.findAll('.tab-btn')
-    expect(tabs.length).toBe(1)
+    expect(tabs.length).toBe(1) 
     
     expect(wrapper.find('drafts-stub').exists()).toBe(false)
   })

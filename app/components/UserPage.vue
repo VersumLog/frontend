@@ -20,7 +20,6 @@ const props = defineProps<{
 
 const isOwnProfile = computed(() => props.userData?.isOwner ?? false);
 
-// 2. Тепер беремо статус автора безпосередньо з даних бекенду
 const isAuthor = computed(() => props.userData?.isAuthor ?? false);
 
 const activeTab = ref('Збережене');
