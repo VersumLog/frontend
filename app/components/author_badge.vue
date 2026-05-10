@@ -1,318 +1,205 @@
 <template>
-  <div class="author-profile">
+  <div class="font-['Montserrat'] relative w-full">
     
-    <div v-if="!isModalOpen" class="main-view">
-      
-      <button class="open-modal-btn" @click="openModal">
-        <img src="./pen.png" alt="Edit" style="width: 100%; height: 100%; object-fit: contain;" />
-      </button>
+    <button 
+      v-if="displayedText || isOwner" 
+      class="absolute -right-4 bottom-2 z-10 h-16 w-16 cursor-pointer border-none bg-transparent transition-transform duration-200 hover:scale-110 focus:outline-none"
+      @click="openModal"
+    >
+      <img src="./pen.png" alt="Edit" class="h-full w-full object-contain" />
+    </button>
 
-      <div v-if="isBlockVisible" class="display-block">
-        <h2 class="display-title">Чому я став автором?</h2>
-        <p class="display-text">{{ displayedText }}</p>
+    <Transition 
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-300 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div 
+        v-if="isModalOpen" 
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" 
+        @click.self="closeModal"
+      >
+        <Transition 
+          enter-active-class="transition duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)"
+          enter-from-class="scale-95 opacity-0"
+          enter-to-class="scale-100 opacity-100"
+          leave-active-class="transition duration-300 ease-in"
+          leave-from-class="scale-100 opacity-100"
+          leave-to-class="scale-95 opacity-0"
+        >
+          <div class="relative w-full max-w-lg overflow-hidden rounded-2xl border-4 border-[#744458] bg-[#E5C5D5] shadow-2xl">
+            
+            <div class="custom-scrollbar max-h-[85vh] overflow-y-auto p-6">
+              
+              <div class="mb-6 pt-2 text-center">
+                <h3 class="text-xl font-light text-[#744458]">
+                  {{ isOwner ? 'Редагування біографії' : 'Інформація про автора' }}
+                </h3>
+              </div>
+
+              <div v-if="!isEditing" class="mt-2">
+                <div v-if="displayedText" class="rounded-[1.25rem] border border-[#744458]/40 bg-white/15 p-6 shadow-sm">
+                  <h4 class="mb-4 text-left text-xl font-bold text-black underline decoration-2 underline-offset-4">
+                    Чому я став автором?
+                  </h4>
+                  
+                  <p class="whitespace-pre-wrap break-words text-left text-[1.1rem] font-medium leading-relaxed text-black">
+                    {{ displayedText }}
+                  </p>
+                </div>
+                
+                <div v-else class="py-6 text-center font-medium text-[#744458]/60">
+                  Біографія ще не заповнена.
+                </div>
+
+                <button 
+                  v-if="isOwner" 
+                  @click="startEditing"
+                  class="mt-6 w-full rounded-xl border-[3px] border-[#184E45] bg-[#52AFA0] p-3 text-[1.1rem] font-bold text-white transition-colors hover:bg-[#459a8c]"
+                >
+                  Редагувати
+                </button>
+              </div>
+
+              <div v-else-if="isOwner" class="mt-2 space-y-4">
+                <div class="relative">
+                  <textarea
+                    v-model="draftText"
+                    maxlength="500"
+                    placeholder="Напишіть свою історію..."
+                    class="min-h-[250px] w-full resize-none rounded-2xl border-none bg-[#F3EDF0] p-5 text-base shadow-inner outline-none focus:ring-2 focus:ring-[#744458]/20"
+                    :disabled="isLoading"
+                  ></textarea>
+                  
+                  <div class="mt-1 text-right text-xs font-semibold text-[#744458]">
+                    {{ draftText.length }}/500
+                  </div>
+                </div>
+
+                <p v-if="errorMessage" class="text-center text-sm font-bold text-red-600">{{ errorMessage }}</p>
+
+                <div class="flex justify-between items-center px-10 pt-2">
+                  <button 
+                    @click="saveBio" 
+                    :disabled="isLoading || !draftText.trim()" 
+                    class="cursor-pointer border-none bg-transparent transition-transform hover:scale-110 disabled:opacity-30"
+                  >
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 12L9 17L20 6" stroke="#744458" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+
+                  <button 
+                    @click="cancelEditing" 
+                    :disabled="isLoading" 
+                    class="cursor-pointer border-none bg-transparent transition-transform hover:scale-110 disabled:opacity-30"
+                  >
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6 6L18 18M6 18L18 6" stroke="#744458" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </Transition>
       </div>
-
-    </div>
-
-    <div v-if="isModalOpen" class="modal-overlay">
-      <div class="modal-content">
-        
-        <h3 v-if="isEditing" class="modal-title">Редагуємо</h3>
-        
-        <div class="textarea-wrapper">
-          <textarea 
-            v-model="draftText" 
-            maxlength="500"
-            :readonly="!isEditing || isLoading"
-            :class="{ 'is-loading': isLoading }"
-          ></textarea>
-          <span class="char-count">{{ draftText.length }}/500</span> 
-        </div>
-
-        <button v-if="!isEditing" class="btn-primary" @click="startEditing">
-          Редагувати
-        </button>
-
-        <div v-if="isEditing" class="action-icons">
-          <button class="icon-btn check-btn" @click="save" :disabled="isLoading || !draftText.trim()">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 12L9 17L20 6" stroke="black" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          
-          <button class="icon-btn close-btn" @click="cancel" :disabled="isLoading">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 6L18 18M6 18L18 6" stroke="black" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
-
-      </div>
-    </div>
-
+    </Transition>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-const props = defineProps({
-  username: {
-    type: String,
-    required: true
-  }
+const props = withDefaults(defineProps<{
+  username: string,
+  isOwner?: boolean 
+}>(), {
+  isOwner: true 
 })
 
 const isModalOpen = ref(false)
 const isEditing = ref(false)
-const isBlockVisible = ref(false) 
 const isLoading = ref(false)
+const errorMessage = ref('')
 
-const displayedText = ref('')
-const draftText = ref('')
+const displayedText = ref('') 
+const draftText = ref('')    
 
 onMounted(async () => {
+  await fetchBio()
+})
+
+const fetchBio = async () => {
   try {
     const config = useRuntimeConfig();
-    const token = useCookie('auth_token').value;
-    
-    const response = await $fetch(`${config.public.apiBase}/api/BecomeAuthor/${props.username}/author-bio`, {
-      method: 'GET',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : ''
-      }
-    });
-
-    const bioText = response?.authorBio || response || '';
-    
-    if (bioText) {
-      displayedText.value = bioText;
-      isBlockVisible.value = true;
+    const response = await $fetch<any>(`${config.public.apiBase}/api/BecomeAuthor/${props.username}/author-bio`);
+    if (response && response.bio) {
+      displayedText.value = response.bio;
     }
   } catch (error) {
-    console.error('Помилка при завантаженні біографії:', error);
+    console.error('Помилка завантаження');
   }
-})
+}
 
 const openModal = () => {
   draftText.value = displayedText.value
-  isEditing.value = false
   isModalOpen.value = true
+  isEditing.value = !displayedText.value && props.isOwner
 }
 
-const startEditing = () => {
-  isEditing.value = true
+const closeModal = () => {
+  if (isLoading.value) return
+  isModalOpen.value = false
+  isEditing.value = false
+  errorMessage.value = ''
 }
 
-const save = async () => {
+const startEditing = () => { isEditing.value = true }
+
+const cancelEditing = () => {
+  if (!displayedText.value) closeModal();
+  else {
+    isEditing.value = false
+    draftText.value = displayedText.value
+    errorMessage.value = ''
+  }
+}
+
+const saveBio = async () => {
   if (!draftText.value.trim() || isLoading.value) return;
-
   isLoading.value = true;
-
+  errorMessage.value = '';
   try {
     const config = useRuntimeConfig();
     const token = useCookie('auth_token').value;
-    
     await $fetch(`${config.public.apiBase}/api/BecomeAuthor/update-author-bio`, {
-      method: 'POST', 
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : ''
-      },
-      body: {
-        authorBio: draftText.value.trim()
-      }
+      method: 'POST',
+      headers: { 'Authorization': token ? `Bearer ${token}` : '', 'Content-Type': 'application/json' },
+      body: { AuthorBio: draftText.value.trim() }
     });
-
     displayedText.value = draftText.value;
-    isBlockVisible.value = true; 
     isEditing.value = false;
-    isModalOpen.value = false;
-
-  } catch (error) {
-    console.error('Помилка при збереженні біографії:', error);
+  } catch (error: any) {
+    errorMessage.value = error.data?.message || "Не вдалося зберегти";
   } finally {
     isLoading.value = false;
   }
 }
-
-const cancel = () => {
-  isEditing.value = false
-  isModalOpen.value = false
-}
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 
-.author-profile {
-  font-family: 'Montserrat', sans-serif;
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
-
-.main-view {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 15px;
-}
-
-.open-modal-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 40px; 
-  height: 40px;
-  padding: 5px; 
-  transition: transform 0.2s ease;
-}
-
-.open-modal-btn:hover {
-  transform: scale(1.1);
-}
-
-.display-block {
-  background-color: #dfc8d5; 
-  padding: 20px 25px;
-  border-radius: 12px;
-  max-width: 600px;
-  text-align: left;
-}
-
-.display-title {
-  font-size: 22px;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #000;
-}
-
-.display-text {
-  font-size: 20px;
-  margin: 0;
-  color: #000;
-  line-height: 1.4;
-  white-space: pre-wrap;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: #d6b8cc; 
-  border: 6px solid #6c4159; 
-  border-radius: 18px;
-  width: 580px; 
-  max-width: 95vw;
-  padding: 30px 30px 85px 30px; 
-  text-align: center;
-  position: relative;
-  box-sizing: border-box;
-}
-
-.modal-title {
-  font-size: 22px;
-  font-weight: 600;
-  color: #6c4159;
-  margin-top: 0;
-  margin-bottom: 25px;
-}
-
-.textarea-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-textarea {
-  font-family: 'Montserrat', sans-serif; 
-  width: 100%;
-  height: 220px; 
-  background-color: #f2eef0; 
-  border: none;
-  border-radius: 12px;
-  padding: 20px;
-  font-size: 20px;
-  resize: none;
-  box-sizing: border-box;
-  outline: none;
-  color: #000;
-}
-
-textarea[readonly] {
-  cursor: default;
-}
-
-textarea.is-loading {
-  opacity: 0.7;
-  cursor: wait;
-}
-
-.char-count {
-  position: absolute;
-  bottom: -25px; 
-  right: 5px;
-  font-size: 14px;
-  color: #000;
-}
-
-.btn-primary {
-  font-family: 'Montserrat', sans-serif;
-  background-color: #5abcb0; 
-  color: white;
-  border: 4px solid #1a5e55;
-  border-radius: 4px;
-  padding: 12px 30px;
-  font-size: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 45px;
-  transition: transform 0.2s ease;
-}
-
-.btn-primary:hover {
-  transform: scale(1.03);
-}
-
-.action-icons {
-  position: absolute;
-  bottom: 15px; 
-  left: 0;
-  width: 100%;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 45px; 
-  height: 45px;
-  position: absolute;
-  bottom: 0;
-  transition: transform 0.2s ease;
-}
-
-.icon-btn:hover:not(:disabled) {
-  transform: scale(1.15);
-}
-
-.icon-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.check-btn {
-  left: 20px; 
-}
-
-.close-btn {
-  right: 20px; 
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #744458;
+  border-radius: 10px;
 }
 </style>

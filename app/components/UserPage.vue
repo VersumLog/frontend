@@ -10,8 +10,8 @@ interface UserProfile {
   name: string;
   bio: string;
   createdAt: string;
+  isAuthor: boolean;
   isOwner: boolean;
-  isAuthor: boolean; 
 }
 
 const props = defineProps<{
@@ -19,12 +19,14 @@ const props = defineProps<{
 }>();
 
 const isOwnProfile = computed(() => props.userData?.isOwner ?? false);
+const isAuthorProfile = computed(() => props.userData?.isAuthor ?? false);
+
+const emit = defineEmits(['edit', 'refresh-data']);
 
 const isAuthor = computed(() => props.userData?.isAuthor ?? false);
 
 const activeTab = ref('Збережене');
 
-const emit = defineEmits(['edit', 'refresh-data']);
 </script>
 
 <template>
@@ -32,9 +34,22 @@ const emit = defineEmits(['edit', 'refresh-data']);
     <main class="mx-auto max-w-[1300px] px-4 py-8 md:py-[60px]">
 
       <div class="flex flex-col md:flex-row gap-8 md:gap-[60px] items-center md:items-start">
+
+        <!-- Left Column: Avatar & Names -->
+        
         <div class="w-full md:w-[220px] flex flex-col items-center text-center">
-          <div class="w-[180px] h-[180px] md:w-[220px] md:h-[220px] bg-white rounded-full flex items-center justify-center shadow-lg mb-5">
-            <span class="text-[80px] md:text-[100px]">👤</span>
+          <div class="relative mb-5">
+          <div
+              class="w-[180px] h-[180px] md:w-[220px] md:h-[220px] bg-white rounded-full flex items-center justify-center shadow-lg mb-5">
+              <span class="text-[80px] md:text-[100px]">👤</span>
+          </div>
+          <div class="absolute bottom-2 right-6 md:bottom-4 md:right-6">
+              <author_badge v-if="isAuthorProfile" 
+                :username="userData.username" 
+                :is-owner="isOwnProfile"
+              
+              />
+          </div>
           </div>
           <div class="space-y-1">
             <h2 class="text-2xl md:text-[32px] font-black leading-tight">{{ userData?.name }}</h2>
@@ -51,7 +66,7 @@ const emit = defineEmits(['edit', 'refresh-data']);
 
             <div class="w-full sm:w-auto">
               <template v-if="isOwnProfile">
-                <become_author v-if="!isAuthor" class="w-full sm:w-auto" />
+                <become_author v-if="!isAuthorProfile" class="w-full sm:w-auto" />
                 <button v-else class="teal-btn w-full sm:w-auto">Створити твір</button>
               </template>
             </div>
@@ -63,7 +78,7 @@ const emit = defineEmits(['edit', 'refresh-data']);
               {{ userData.bio }}
             </p>
           </div>
-          <author_badge v-if="isAuthor" :username="userData.username" />
+          
         </div>
       </div>
 
