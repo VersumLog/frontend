@@ -28,7 +28,9 @@ const submitForm = async () => {
         'Authorization': token ? `Bearer ${token}` : ''
       },
     
-      body: authorText.value.trim() 
+      body: {
+        authorBio: authorText.value.trim() 
+      }
     });
 
     isFormModalOpen.value = false;
