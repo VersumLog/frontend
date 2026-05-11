@@ -81,6 +81,12 @@ const activeTab = ref('Збережене');
             <changeprofile v-if="isOwnProfile" :user-data="userData" @profile-updated="$emit('refresh-data')"
               class="absolute bottom-4 right-4 md:bottom-6 ">
             </changeprofile>
+
+            <subscribe 
+              v-if="!isOwnProfile" 
+              class="absolute -right-3 -bottom-3 md:-right-5 md:-bottom-5 z-10" 
+            />
+
           </div>
           
         </div>
