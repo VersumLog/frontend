@@ -232,7 +232,6 @@ watch([activeTab, sortBy, sortDesc], () => {
   bottom: 0;
   display: flex;
   align-items: center;
-  z-index: 1001; 
 }
 
 .sort-trigger {
