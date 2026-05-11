@@ -36,20 +36,16 @@ const activeTab = ref('Збережене');
       <div class="flex flex-col md:flex-row gap-8 md:gap-[60px] items-center md:items-start">
 
         <!-- Left Column: Avatar & Names -->
-        
+
         <div class="w-full md:w-[220px] flex flex-col items-center text-center">
           <div class="relative mb-5">
-          <div
+            <div
               class="w-[180px] h-[180px] md:w-[220px] md:h-[220px] bg-white rounded-full flex items-center justify-center shadow-lg mb-5">
               <span class="text-[80px] md:text-[100px]">👤</span>
-          </div>
-          <div class="absolute bottom-2 right-6 md:bottom-4 md:right-6">
-              <author_badge v-if="isAuthorProfile" 
-                :username="userData.username" 
-                :is-owner="isOwnProfile"
-              
-              />
-          </div>
+            </div>
+            <div class="absolute bottom-2 right-6 md:bottom-4 md:right-6">
+              <author_badge v-if="isAuthorProfile" :username="userData.username" :is-owner="isOwnProfile" />
+            </div>
           </div>
           <div class="space-y-1">
             <h2 class="text-2xl md:text-[32px] font-black leading-tight">{{ userData?.name }}</h2>
@@ -60,19 +56,15 @@ const activeTab = ref('Збережене');
         <div class="flex-1 w-full flex flex-col gap-6 md:gap-8">
           <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-2">
             <div class="flex gap-6 md:gap-10 text-xl md:text-2xl font-medium">
-              <div class="whitespace-nowrap">Підписок <strong class="font-black text-2xl md:text-[26px]">2</strong></div>
-              <div class="whitespace-nowrap">Підписників <strong class="font-black text-2xl md:text-[26px]">22</strong></div>
-            </div>
-
-            <div class="w-full sm:w-auto">
-              <template v-if="isOwnProfile">
-                <become_author v-if="!isAuthorProfile" class="w-full sm:w-auto" />
-                <button v-else class="teal-btn w-full sm:w-auto">Створити твір</button>
-              </template>
+              <div class="whitespace-nowrap">Підписок <strong class="font-black text-2xl md:text-[26px]">2</strong>
+              </div>
+              <div class="whitespace-nowrap">Підписників <strong class="font-black text-2xl md:text-[26px]">22</strong>
+              </div>
             </div>
           </div>
-
-          <div class="relative bg-[#FFE6B7] p-6 md:p-10 rounded-[30px] md:rounded-[40px] min-h-[150px] md:min-h-[180px] shadow-sm">
+          
+          <div
+            class="relative bg-[#FFE6B7] p-6 md:p-10 rounded-[30px] md:rounded-[40px] min-h-[150px] md:min-h-[180px] shadow-sm">
             <span class="block font-extrabold text-xl md:text-24px mb-3 uppercase tracking-wide">Про мене:</span>
             <p class="text-base md:text-xl leading-relaxed text-[#04151F] break-all sm:break-words whitespace-normal">
               {{ userData.bio }}
@@ -82,22 +74,18 @@ const activeTab = ref('Збережене');
               class="absolute bottom-4 right-4 md:bottom-6 ">
             </changeprofile>
           </div>
-          
+
         </div>
       </div>
 
       <div class="mt-12 md:mt-16">
-        <Writings 
-          :username="userData.username"
-          :is-owner="userData.isOwner"
-          :is-author="isAuthor"
-        />
+        <Writings :username="userData.username" :is-owner="userData.isOwner" :is-author="isAuthor" />
       </div>
 
       <div v-if="isOwnProfile" class="mt-16 md:mt-20 mb-10 text-center">
         <deleteAccount />
       </div>
-      
+
       <div v-if="isOwnProfile">
         <button @click="useAuth().logout()">Вийти</button>
       </div>

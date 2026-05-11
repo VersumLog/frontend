@@ -81,7 +81,7 @@ const handleLogin = async () => {
     if (error.data?.errors) {
       errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
     } else {
-      errorMessage.value = error.data?.message || "Не вдалося змінити пароль";
+      errorMessage.value = error.data?.message || "Не вдалося ввійти";
     }
 
     console.error("Помилка при логіні:", error);

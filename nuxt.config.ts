@@ -19,6 +19,6 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss', 
     '@nuxt/icon',
-    '@nuxt/test-utils/module' // <-- Додали цей рядок
+    '@nuxt/test-utils/module'
   ]
 })
