@@ -1,0 +1,46 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const emit = defineEmits(['update-follow'])
+const isFollowing = ref(false)
+
+const toggleFollow = () => {
+  isFollowing.value = !isFollowing.value
+  emit('update-follow', isFollowing.value)
+}
+</script>
+
+<template>
+  <div class="group inline-block">
+    <button 
+      class="relative flex items-center justify-center bg-[#72485E] text-black border border-black rounded-full cursor-pointer shadow-md transition-all hover:bg-[#5c3a4b] active:scale-95 w-[60px] h-[60px] md:w-[70px] md:h-[70px]" 
+      @click="toggleFollow"
+      :aria-label="isFollowing ? 'Відписатись' : 'Підписатись'"
+    >
+      
+      <svg 
+        class="w-10 h-10 md:w-11 md:h-11 transition-transform duration-200" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path 
+          :d="isFollowing ? 'M5 12H19' : 'M12 5V19M5 12H19'" 
+          stroke="white" 
+          stroke-width="2.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+        />
+      </svg>
+
+      <span 
+        class="absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-[#FDE9D1] text-[#04151F] text-sm md:text-base font-bold font-sans rounded-xl border-2 border-[#72485E] shadow-md opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-20"
+      >
+        {{ isFollowing ? 'Відписатись' : 'Підписатись' }}
+        
+        <span class="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#FDE9D1] border-b-2 border-r-2 border-[#72485E] rotate-45"></span>
+      </span>
+      
+    </button>
+  </div>
+</template>
