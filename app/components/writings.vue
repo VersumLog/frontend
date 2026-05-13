@@ -113,7 +113,9 @@
           <div v-for="work in works" :key="work.postId" class="work-card">
             <div class="card-center">
               <h3 class="work-title">{{ work.title }}</h3>
-              <span class="work-genre">{{ work.genres?.[0]?.name || 'Жанр' }}</span>
+              <span class="work-genre">
+                {{ work.genres && work.genres.length > 0 ? work.genres[0] : 'Без жанру' }}
+              </span>
             </div>
 
             <div class="work-stats">

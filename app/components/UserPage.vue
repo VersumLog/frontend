@@ -4,6 +4,7 @@ import BecomeAuthor from './become_author.vue';
 import AuthorBadge from './author_badge.vue';
 import DeleteAccount from './deleteAccount.vue';
 import Writings from './writings.vue';
+import CreatePost from './CreatePost.vue';
 
 interface UserProfile {
   username: string;
@@ -62,7 +63,6 @@ const activeTab = ref('Збережене');
               </div>
             </div>
           </div>
-          
           <div
             class="relative bg-[#FFE6B7] p-6 md:p-10 rounded-[30px] md:rounded-[40px] min-h-[150px] md:min-h-[180px] shadow-sm">
             <span class="block font-extrabold text-xl md:text-24px mb-3 uppercase tracking-wide">Про мене:</span>
@@ -90,6 +90,7 @@ const activeTab = ref('Збережене');
         <button @click="useAuth().logout()">Вийти</button>
       </div>
     </main>
+    <CreatePost v-if="isAuthorProfile && isOwnProfile" />
   </div>
 </template>
 
