@@ -180,6 +180,7 @@ watch([activeTab, sortBy, sortDesc], () => {
 }, { immediate: true })
 </script>
 
+<!-- TO REFACTOR --> 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
@@ -231,7 +232,6 @@ watch([activeTab, sortBy, sortDesc], () => {
   bottom: 0;
   display: flex;
   align-items: center;
-  z-index: 1001; 
 }
 
 .sort-trigger {

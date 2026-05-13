@@ -16,7 +16,7 @@
           <span class="work-genre">{{ draft.genres?.[0]?.name || 'Жанр' }}</span>
         </div>
         
-        <button class="action-btn">Редагувати</button>
+        <button @click="navigateTo(`/write/${draft.postId}`)" class="action-btn">Редагувати</button>
       </div>
     </transition-group>
   </div>
