@@ -96,15 +96,24 @@ watch(() => props.initialGenre, (newGenre) => {
 
 const showCancelModal = ref(false)
 const isSaving = ref(false)
+const showSuccessMessage = ref(false)
 
 const updateDraft = async () => {
   isSaving.value = true;
+  errorMessage.value = '';
   try {
     await $fetch(`${config.public.apiBase}/api/posts/${props.postId}/update-draft`, {
       method: 'POST',
       headers: token.value ? { 'Authorization': `Bearer ${token.value}` } : {},
       body: writing
     });
+
+    showSuccessMessage.value = true;
+
+    setTimeout(() => {
+      showSuccessMessage.value = false;
+    }, 2000);
+
   } catch (error: any) {
     if (error.data?.errors) {
       errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
@@ -112,7 +121,7 @@ const updateDraft = async () => {
       errorMessage.value = error.data?.message || "Не вдалося створити твір";
     }
   } finally {
-    isSaving.value = false; 
+    isSaving.value = false;
   }
 }
 
@@ -138,23 +147,17 @@ const publishPost = async () => {
 
     <!-- Селектор жанру -->
     <div class="relative self-start">
-      <div 
-        @click="isGenreOpen = !isGenreOpen"
-        class="cursor-pointer px-4 py-1 rounded-full border-2 border-[#c2b280] text-[#c2b280] font-semibold text-sm hover:bg-[#c2b280] hover:text-white transition-all flex items-center gap-2"
-      >
+      <div @click="isGenreOpen = !isGenreOpen"
+        class="cursor-pointer px-4 py-1 rounded-full border-2 border-[#c2b280] text-[#c2b280] font-semibold text-sm hover:bg-[#c2b280] hover:text-white transition-all flex items-center gap-2">
         <span>{{ writing.genres[0] || 'Обрати жанр' }}</span>
         <span class="text-[10px] transition-transform" :class="{ 'rotate-180': isGenreOpen }">▼</span>
       </div>
 
       <!-- Випадаючий список -->
-      <div v-if="isGenreOpen" 
-           class="absolute top-full left-0 mt-2 w-48 bg-white border border-[#d1c4ae] rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
-        <div 
-          v-for="genre in genres" 
-          :key="genre"
-          @click="selectGenre(genre)"
-          class="px-4 py-2 hover:bg-[#FDF5E6] cursor-pointer text-[#5c5446] transition-colors border-b border-[#f3eee5] last:border-0"
-        >
+      <div v-if="isGenreOpen"
+        class="absolute top-full left-0 mt-2 w-48 bg-white border border-[#d1c4ae] rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
+        <div v-for="genre in genres" :key="genre" @click="selectGenre(genre)"
+          class="px-4 py-2 hover:bg-[#FDF5E6] cursor-pointer text-[#5c5446] transition-colors border-b border-[#f3eee5] last:border-0">
           {{ genre }}
         </div>
       </div>
@@ -168,18 +171,35 @@ const publishPost = async () => {
       class="w-full p-4 rounded-lg border border-[#d1c4ae] focus:outline-none focus:ring-1 focus:ring-[#c2b280] resize-none"
       placeholder="Короткий опис твого твору..."></textarea>
 
-    <div class="h-[500px] border border-[#d1c4ae] bg-white rounded-lg overflow-hidden shadow-inner">
-      <ToolBar :editor="editor" />
+    <div class="h-[500px] border border-[#d1c4ae] bg-white rounded-lg overflow-hidden shadow-inner flex flex-col">
+
+      <div class="sticky top-0 z-10 bg-white border-b border-[#d1c4ae]">
+        <ToolBar :editor="editor" />
+      </div>
 
       <ClientOnly>
-        <EditorContent :editor="editor" class="flex-1 p-6 overflow-y-auto" />
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+          <EditorContent :editor="editor" class="p-6 min-h-full" />
+        </div>
       </ClientOnly>
+
     </div>
 
     <div class="flex justify-between items-center">
       <button @click="showCancelModal = true" class="p-2 hover:bg-red-50 rounded-full transition-colors">
         <span class="text-2xl">✕</span>
       </button>
+
+      <Transition name="toast">
+        <div v-if="showSuccessMessage"
+          class="fixed bottom-8 right-8 z-[120] bg-[#8A9A5B] text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 border border-[#7A8A4B]">
+
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span class="font-medium">Чернетку успішно збережено!</span>
+        </div>
+      </Transition>
 
       <div class="flex gap-4">
         <button @click="updateDraft"
@@ -240,5 +260,15 @@ const publishPost = async () => {
 
 .tiptap p {
   margin-bottom: 0.5rem;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
 }
 </style>
