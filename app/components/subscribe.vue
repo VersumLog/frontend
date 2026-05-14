@@ -1,20 +1,58 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+
+const props = defineProps<{
+  username: string
+  initialIsFollowing?: boolean
+}>()
 
 const emit = defineEmits(['update-follow'])
-const isFollowing = ref(false)
 
-const toggleFollow = () => {
+const isFollowing = ref(props.initialIsFollowing ?? false)
+const isLoading = ref(false)
+watch(() => props.initialIsFollowing, (newVal) => {
+  if (newVal !== undefined) {
+    isFollowing.value = newVal
+  }
+})
+
+const toggleFollow = async () => {
+  if (isLoading.value) return
+
   isFollowing.value = !isFollowing.value
   emit('update-follow', isFollowing.value)
+
+  isLoading.value = true
+
+  try {
+    const config = useRuntimeConfig()
+    const token = useCookie('auth_token').value
+
+    await $fetch<any>(`${config.public.apiBase}/api/Profile/follow/${props.username}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : ''
+      }
+    })
+
+
+  } catch (error: any) {
+    console.error('Помилка при зміні статусу підписки:', error)
+    
+    isFollowing.value = !isFollowing.value
+    emit('update-follow', isFollowing.value)
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
 <template>
   <div class="group inline-block">
     <button 
-      class="relative flex items-center justify-center bg-[#72485E] text-black border border-black rounded-full cursor-pointer shadow-md transition-all hover:bg-[#5c3a4b] active:scale-95 w-[60px] h-[60px] md:w-[70px] md:h-[70px]" 
+      class="relative flex items-center justify-center bg-[#72485E] text-black border border-black rounded-full cursor-pointer shadow-md transition-all hover:bg-[#5c3a4b] active:scale-95 w-[60px] h-[60px] md:w-[70px] md:h-[70px] disabled:opacity-50 disabled:cursor-not-allowed" 
       @click="toggleFollow"
+      :disabled="isLoading"
       :aria-label="isFollowing ? 'Відписатись' : 'Підписатись'"
     >
       

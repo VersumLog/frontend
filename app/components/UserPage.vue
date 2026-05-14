@@ -4,6 +4,7 @@ import BecomeAuthor from './become_author.vue';
 import AuthorBadge from './author_badge.vue';
 import DeleteAccount from './deleteAccount.vue';
 import Writings from './writings.vue';
+import Statistics from './statistics.vue';
 
 interface UserProfile {
   username: string;
@@ -12,6 +13,7 @@ interface UserProfile {
   createdAt: string;
   isAuthor: boolean;
   isOwner: boolean;
+  isFollowing?: boolean;
 }
 
 const props = defineProps<{
@@ -26,6 +28,9 @@ const emit = defineEmits(['edit', 'refresh-data']);
 const isAuthor = computed(() => props.userData?.isAuthor ?? false);
 
 const activeTab = ref('Збережене');
+const handleFollowUpdate = (isNowFollowing: boolean) => {
+  emit('refresh-data');
+};
 
 </script>
 
@@ -55,12 +60,10 @@ const activeTab = ref('Збережене');
 
         <div class="flex-1 w-full flex flex-col gap-6 md:gap-8">
           <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-2">
-            <div class="flex gap-6 md:gap-10 text-xl md:text-2xl font-medium">
-              <div class="whitespace-nowrap">Підписок <strong class="font-black text-2xl md:text-[26px]">2</strong>
-              </div>
-              <div class="whitespace-nowrap">Підписників <strong class="font-black text-2xl md:text-[26px]">22</strong>
-              </div>
-            </div>
+          <div class="flex gap-6 md:gap-10 text-xl md:text-2xl font-medium">
+ 
+            <Statistics />
+          </div>
           </div>
           
           <div
@@ -73,11 +76,13 @@ const activeTab = ref('Збережене');
             <changeprofile v-if="isOwnProfile" :user-data="userData" @profile-updated="$emit('refresh-data')"
               class="absolute bottom-4 right-4 md:bottom-6 ">
             </changeprofile>
-
             <subscribe 
-              v-if="!isOwnProfile" 
-              class="absolute -right-3 -bottom-3 md:-right-5 md:-bottom-5 z-10" 
-            />
+               v-if="!isOwnProfile" 
+                class="absolute -right-3 -bottom-3 md:-right-5 md:-bottom-5 z-10" 
+                :username="userData.username" 
+                :initial-is-following="userData.isFollowing" 
+                 @update-follow="handleFollowUpdate"
+/>
 
           </div>
 
