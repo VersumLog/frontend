@@ -127,6 +127,7 @@ const updateDraft = async () => {
 
 const publishPost = async () => {
   isSaving.value = true;
+  await updateDraft()
   try {
     await $fetch(`${config.public.apiBase}/api/posts/${props.postId}/publish-draft`, {
       method: 'POST',
@@ -134,8 +135,12 @@ const publishPost = async () => {
       body: writing
     });
     navigateTo(`/profile/${nickname.value}`)
-  } catch (e) {
-    alert('Помилка публікації');
+  } catch (error: any) {
+    if (error.data?.errors) {
+      errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
+    } else {
+      errorMessage.value = error.data?.message || "Не вдалося створити твір";
+    }
   } finally {
     isSaving.value = false;
   }
@@ -206,7 +211,8 @@ const publishPost = async () => {
           class="px-6 py-2 border-2 border-[#c2b280] text-[#c2b280] font-bold rounded-lg hover:bg-[#c2b280] hover:text-white transition-all">
           Зберегти чернетку
         </button>
-        <button @click="publishPost"
+        <button 
+        @click="publishPost"
           class="px-6 py-2 bg-[#c2b280] text-white font-bold rounded-lg hover:bg-[#b1a170] transition-all shadow-md">
           Опублікувати
         </button>
