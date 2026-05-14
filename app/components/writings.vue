@@ -111,6 +111,7 @@
           :class="{ 'is-fetching': isLoading }"
         >
           <div v-for="work in works" :key="work.postId" class="work-card">
+            
             <div class="card-center">
               <h3 class="work-title">{{ work.title }}</h3>
               <span class="work-genre">{{ work.genres?.[0]?.name || 'Жанр' }}</span>
@@ -121,9 +122,29 @@
               <span>{{ work.commentsCount || 0 }} коментів</span>
             </div>
 
-            <button class="action-btn">Читати</button>
+            <div class="card-actions">
+              <button class="action-btn">Читати</button>
+              
+              <button 
+                v-if="props.isOwner"
+                class="delete-cross-btn"
+                @click="openDeleteModal(work)"
+                title="Видалити твір"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
           </div>
         </transition-group>
+
+        <deletePost 
+          :isOpen="isDeleteModalOpen" 
+          @close="closeDeleteModal" 
+          @confirm="handleDeleteConfirm" 
+        />
 
       </div>
 
@@ -137,6 +158,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import Drafts from './drafts.vue'
+import deletePost from './deletePost.vue'
 
 const props = defineProps({
   username: { type: String, required: true },
@@ -151,6 +173,43 @@ const isLoading = ref(false)
 const sortBy = ref('Title')
 const sortDesc = ref(false)
 const isSortMenuOpen = ref(false)
+
+const isDeleteModalOpen = ref(false)
+const postToDelete = ref(null) 
+
+const openDeleteModal = (work) => {
+  postToDelete.value = work
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
+  postToDelete.value = null
+}
+
+const handleDeleteConfirm = async () => {
+  if (!postToDelete.value) return;
+  
+  try {
+    const baseUrl = config.public.apiBase || 'https://localhost:7014';
+    const token = useCookie('auth_token').value; 
+
+    // Відправляємо запит на видалення до API
+    await $fetch(`${baseUrl}/api/Posts/${postToDelete.value.postId}/delete-post`, {
+      method: 'POST', 
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    works.value = works.value.filter(w => w.postId !== postToDelete.value.postId);
+    console.log(`Твір успішно видалено`);
+    
+  } catch (error) {
+    console.error("Помилка при видаленні твору:", error);
+  } finally {
+    closeDeleteModal();
+  }
+}
 
 const fetchPosts = async () => {
   if (!props.isAuthor) return 
@@ -180,7 +239,6 @@ watch([activeTab, sortBy, sortDesc], () => {
 }, { immediate: true })
 </script>
 
-<!-- TO REFACTOR --> 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
@@ -452,12 +510,55 @@ watch([activeTab, sortBy, sortDesc], () => {
 .work-genre { color: #000; font-size: 14px; }
 .work-stats { position: absolute; bottom: 15px; left: 20px; color: #000; font-size: 14px; display: flex; gap: 20px; }
 
-.action-btn {
-  position: absolute; bottom: 15px; right: 20px; background-color: #1e4b6c; color: white;
-  border: none; border-radius: 6px; padding: 8px 30px; font-family: inherit; font-size: 16px;
-  cursor: pointer; transition: background-color 0.2s;
+.card-actions {
+  position: absolute !important;
+  bottom: 15px !important;
+  right: 20px !important;
+  display: flex !important;
+  align-items: center !important; 
+  gap: 12px !important; 
+  z-index: 10;
 }
-.action-btn:hover { background-color: #15364e; }
+
+.action-btn {
+  position: static !important;
+  background-color: #1e4b6c; 
+  color: white;
+  border: none; 
+  border-radius: 6px; 
+  padding: 8px 30px; 
+  font-family: inherit; 
+  font-size: 16px;
+  cursor: pointer; 
+  transition: background-color 0.2s;
+  height: fit-content;
+}
+
+.action-btn:hover { 
+  background-color: #15364e; 
+}
+
+.delete-cross-btn {
+  position: static !important;
+  background-color: transparent;
+  border: 2px solid #1c4b43;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1c4b43;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+
+.delete-cross-btn:hover {
+  background-color: #1c4b43;
+  color: #4f9689;
+  transform: scale(1.1);
+}
 
 .scrollable-list::-webkit-scrollbar { width: 8px; }
 .scrollable-list::-webkit-scrollbar-track { background: #FFE6BD; border-radius: 4px; }
