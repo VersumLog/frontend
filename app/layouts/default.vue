@@ -1,7 +1,9 @@
+<script setup lang="ts">
+</script>
+
 <template>
   <div class="min-h-screen">
     <navbar />
-
     <main class="content-area">
       <slot> </slot>
     </main>

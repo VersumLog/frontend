@@ -14,7 +14,9 @@
         
         <div class="card-center">
           <h3 class="work-title">{{ draft.title }}</h3>
-          <span class="work-genre">{{ draft.genres?.[0]?.name || 'Жанр' }}</span>
+          <span class="work-genre">
+            {{ draft.genres && draft.genres.length > 0 ? draft.genres[0] : 'Без жанру' }}
+          </span>
         </div>
         
         <div class="card-actions">

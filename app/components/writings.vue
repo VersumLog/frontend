@@ -114,7 +114,9 @@
             
             <div class="card-center">
               <h3 class="work-title">{{ work.title }}</h3>
-              <span class="work-genre">{{ work.genres?.[0]?.name || 'Жанр' }}</span>
+              <span class="work-genre">
+                {{ work.genres && work.genres.length > 0 ? work.genres[0] : 'Без жанру' }}
+              </span>
             </div>
 
             <div class="work-stats">
@@ -290,7 +292,6 @@ watch([activeTab, sortBy, sortDesc], () => {
   bottom: 0;
   display: flex;
   align-items: center;
-  z-index: 1001; 
 }
 
 .sort-trigger {
