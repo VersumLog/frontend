@@ -18,7 +18,7 @@
         </div>
         
         <div class="card-actions">
-          <button class="action-btn">Редагувати</button>
+          <button @click="navigateTo(`/write/${draft.postId}`)" class="action-btn">Редагувати</button>
 
           <button 
             class="delete-cross-btn"
