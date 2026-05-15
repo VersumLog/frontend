@@ -121,6 +121,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   isOwner: true 
 })
+const { token, nickname } = useAuth();
 
 const isModalOpen = ref(false)
 const isEditing = ref(false)
@@ -176,7 +177,6 @@ const saveBio = async () => {
   errorMessage.value = '';
   try {
     const config = useRuntimeConfig();
-    const token = useCookie('auth_token').value;
     await $fetch(`${config.public.apiBase}/api/BecomeAuthor/update-author-bio`, {
       method: 'POST',
       headers: { 'Authorization': token ? `Bearer ${token}` : '', 'Content-Type': 'application/json' },

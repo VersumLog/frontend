@@ -2,10 +2,9 @@
 import { ref, computed } from 'vue';
 import BecomeAuthor from './become_author.vue';
 import AuthorBadge from './author_badge.vue';
-import DeleteAccount from './deleteAccount.vue';
-import Writings from './writings.vue';
 import Statistics from './statistics.vue';
 import CreatePost from './CreatePost.vue';
+import ProfileWritings from './profileWritings.vue';
 
 interface UserProfile {
   username: string;
@@ -15,6 +14,9 @@ interface UserProfile {
   isAuthor: boolean;
   isOwner: boolean;
   isFollowing?: boolean;
+  worksCount: number;
+  followingCount: number;
+  followersCount: number;
 }
 
 const props = defineProps<{
@@ -63,7 +65,11 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
           <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-2">
           <div class="flex gap-6 md:gap-10 text-xl md:text-2xl font-medium">
  
-            <Statistics />
+            <Statistics 
+                :works-count="userData.worksCount" 
+                :following-count="userData.followingCount" 
+                :followers-count="userData.followersCount" 
+              />
           </div>
           </div>
           <div
@@ -90,7 +96,7 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
       </div>
 
       <div class="mt-12 md:mt-16">
-        <Writings :username="userData.username" :is-owner="userData.isOwner" :is-author="isAuthor" />
+        <ProfileWritings :username="userData.username" :is-owner="userData.isOwner" :is-author="isAuthor" />
       </div>
 
       <div v-if="isOwnProfile" class="mt-16 md:mt-20 mb-10 text-center">
