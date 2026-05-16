@@ -39,14 +39,14 @@ const saveDraft = async () => {
   <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="emit('close')"></div>
     
-    <div class="relative bg-[#FDF5E6] w-full max-w-md p-8 rounded-2xl shadow-2xl border border-[#e5d8c1]">
-      <h3 class="text-2xl font-serif font-bold mb-6 text-gray-800">Новий твір</h3>
+    <div class="relative bg-cream-light w-full max-w-md p-8 rounded-2xl shadow-2xl border border-cream-input">
+      <h3 class="text-2xl font-serif font-bold mb-6 text-main">Новий твір</h3>
       
       <input 
       v-model="title" 
       type="text"
       placeholder="Введіть заголовок..." 
-      class="w-full p-3 rounded-lg border border-[#d1c4ae] bg-white focus:outline-none focus:ring-2 focus:ring-[#c2b280] mb-8"
+      class="w-full p-3 rounded-lg border border-cream-input bg-input-bg focus:outline-none focus:ring-2 focus:ring-cream-dark mb-8"
       autofocus
       />
       
@@ -61,7 +61,7 @@ const saveDraft = async () => {
         </button>
         <button 
         @click="saveDraft" 
-        class="px-6 py-2 rounded-lg bg-[#c2b280] text-white font-medium hover:bg-[#b1a170] disabled:opacity-50 transition-colors"
+        class="px-6 py-2 rounded-lg bg-cream-dark text-white font-medium hover:bg-cream-dark disabled:opacity-50 transition-colors"
         :loading="isLoading"
         >
         {{ isLoading ? 'Збереження...' : 'Продовжити' }}

@@ -19,6 +19,10 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss', 
     '@nuxt/icon',
-    '@nuxt/test-utils/module'
-  ]
+    '@nuxt/test-utils/module',
+    '@nuxtjs/color-mode'
+  ],
+  colorMode: {
+    classSuffix: ''
+  }
 })

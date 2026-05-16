@@ -1,3 +1,22 @@
+<script setup lang="ts">
+defineProps<{
+  isOpen: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'close'): void
+  (e: 'confirm'): void
+}>()
+
+const close = () => {
+  emit('close')
+}
+
+const confirm = () => {
+  emit('confirm')
+}
+</script>
+
 <template>
   <Transition 
     enter-active-class="transition duration-300 ease-out"
@@ -22,7 +41,7 @@
       >
         <div 
           v-if="isOpen"
-          class="relative w-full max-w-xl overflow-hidden rounded-md border-4 border-[#744458] bg-[#E5C5D5] p-10 shadow-2xl"
+          class="relative w-full max-w-xl overflow-hidden rounded-md border-4 border-plum-light bg-mauve p-10 shadow-2xl"
         >
           <!-- Заголовок -->
           <h3 class="mb-12 text-center text-[1.4rem] font-medium text-black leading-snug">
@@ -35,7 +54,7 @@
             <!-- Кнопка "Так" -->
             <button 
               @click="confirm"
-              class="min-w-[160px] rounded-md border-[3px] border-[#184E45] bg-[#52AFA0] px-8 py-2.5 text-[1.1rem] font-bold text-white transition-all hover:bg-[#459a8c] hover:scale-105 active:scale-95 focus:outline-none"
+              class="min-w-[160px] rounded-md border-[3px] border-mint-dark bg-mint-hover px-8 py-2.5 text-[1.1rem] font-bold text-white transition-all hover:bg-mint-hover hover:scale-105 active:scale-95 focus:outline-none"
             >
               Так
             </button>
@@ -43,7 +62,7 @@
             <!-- Кнопка "Скасувати" -->
             <button 
               @click="close"
-              class="min-w-[160px] rounded-md border-[3px] border-[#184E45] bg-[#52AFA0] px-8 py-2.5 text-[1.1rem] font-bold text-white transition-all hover:bg-[#459a8c] hover:scale-105 active:scale-95 focus:outline-none"
+              class="min-w-[160px] rounded-md border-[3px] border-mint-dark bg-mint-hover px-8 py-2.5 text-[1.1rem] font-bold text-white transition-all hover:bg-mint-hover hover:scale-105 active:scale-95 focus:outline-none"
             >
               Скасувати
             </button>
@@ -55,26 +74,3 @@
     </div>
   </Transition>
 </template>
-
-<script setup lang="ts">
-defineProps<{
-  isOpen: boolean
-}>()
-
-const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'confirm'): void
-}>()
-
-const close = () => {
-  emit('close')
-}
-
-const confirm = () => {
-  emit('confirm')
-}
-</script>
-
-<style scoped>
-/* Стилі Tailwind CSS */
-</style>

@@ -11,55 +11,68 @@ const isActive = (name: string, attributes = {}) => {
 </script>
 
 <template>
-  <div v-if="editor" class="flex flex-wrap gap-1 p-2 bg-white border-b border-gray-200 rounded-t-lg">
+  <div v-if="editor" class="flex flex-wrap gap-1 p-2 bg-cream-light border-b-2 border-cream-input rounded-t-xl">
+    
     <button
       type="button"
       @click="editor.chain().focus().toggleBold().run()"
-      :class="['px-3 py-1.5 rounded border transition-colors font-bold', isActive('bold')]"
+      class="p-2 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer min-w-[36px] h-9 outline-none"
+      :class="editor.isActive('bold') ? 'bg-plum text-white font-bold shadow-sm' : 'text-main hover:bg-plum-light/10'"
+      title="Жирний"
     >
-      B
+      <Icon name="lucide:bold" class="w-4 h-4" />
     </button>
 
     <button
       type="button"
       @click="editor.chain().focus().toggleItalic().run()"
-      :class="['px-3 py-1.5 rounded border transition-colors italic', isActive('italic')]"
+      class="p-2 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer min-w-[36px] h-9 outline-none"
+      :class="editor.isActive('italic') ? 'bg-plum text-white font-bold shadow-sm' : 'text-main hover:bg-plum-light/10'"
+      title="Курсив"
     >
-      I
+      <Icon name="lucide:italic" class="w-4 h-4" />
     </button>
 
     <button
       type="button"
       @click="editor.chain().focus().toggleUnderline().run()"
-      :class="['px-3 py-1.5 rounded border transition-colors underline', isActive('underline')]"
+      class="p-2 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer min-w-[36px] h-9 outline-none"
+      :class="editor.isActive('underline') ? 'bg-plum text-white font-bold shadow-sm' : 'text-main hover:bg-plum-light/10'"
+      title="Підкреслений"
     >
-      U
+      <Icon name="lucide:underline" class="w-4 h-4" />
     </button>
 
-    <div class="w-px h-6 bg-gray-300 mx-1 self-center" />
+    <div class="w-px h-6 bg-cream-input mx-1.5 self-center" />
 
     <button
       type="button"
       @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
-      :class="['px-3 py-1.5 rounded border transition-colors font-black', isActive('heading', { level: 1 })]"
+      class="p-2 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer min-w-[36px] h-9 outline-none"
+      :class="editor.isActive('heading', { level: 1 }) ? 'bg-plum text-white font-bold shadow-sm' : 'text-main hover:bg-plum-light/10'"
+      title="Заголовок 1"
     >
-      H1
+      <Icon name="lucide:heading-1" class="w-4 h-4" />
     </button>
 
     <button
       type="button"
       @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
-      :class="['px-3 py-1.5 rounded border transition-colors font-bold', isActive('heading', { level: 2 })]"
+      class="p-2 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer min-w-[36px] h-9 outline-none"
+      :class="editor.isActive('heading', { level: 2 }) ? 'bg-plum text-white font-bold shadow-sm' : 'text-main hover:bg-plum-light/10'"
+      title="Заголовок 2"
     >
-      H2
+      <Icon name="lucide:heading-2" class="w-4 h-4" />
     </button>
 
     <button
       type="button"
       @click="editor.chain().focus().setParagraph().run()"
-      class="px-3 py-1.5 rounded border border-transparent hover:bg-gray-100 text-gray-700 transition-colors"
+      class="px-3 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer h-9 outline-none"
+      :class="editor.isActive('paragraph') ? 'bg-plum text-white shadow-sm' : 'text-main hover:bg-plum-light/10'"
     >
-      Текст
+      <Icon name="lucide:text" class="w-4 h-4" />
+      <span>Текст</span>
     </button>
   </div>
 </template>

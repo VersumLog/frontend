@@ -1,3 +1,115 @@
+<script setup>
+import { ref, computed, watch } from 'vue'
+import DeletePost from './deletePost.vue'
+
+const props = defineProps({
+  username: { type: String, required: true },
+  isOwner: { type: Boolean, default: false },
+  isAuthor: { type: Boolean, default: false } 
+})
+
+const config = useRuntimeConfig()
+const { token, nickname } = useAuth();
+
+const activeTab = ref('works')
+const isLoading = ref(false)
+
+const sortBy = ref('Title')
+const sortDesc = ref(false)
+const isSortMenuOpen = ref(false)
+
+const works = ref([])
+const drafts = ref([])
+
+const currentItems = computed(() => {
+  return activeTab.value === 'works' ? works.value : drafts.value
+})
+
+const isDeleteModalOpen = ref(false)
+const itemToDelete = ref(null) 
+
+const openDeleteModal = (item) => {
+  itemToDelete.value = item
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
+  itemToDelete.value = null
+}
+
+const handleDeleteConfirm = async () => {
+  if (!itemToDelete.value) return;
+  
+  try {
+    const baseUrl = config.public.apiBase || 'https://localhost:7014';
+    const id = itemToDelete.value.postId || itemToDelete.value.id;
+
+    await $fetch(`${baseUrl}/api/Posts/${id}/delete-post`, {
+      method: 'POST', 
+      headers: { 'Authorization': `Bearer ${token.value}` }
+    });
+    
+    // Оновлюємо відповідний масив
+    if (activeTab.value === 'works') {
+      works.value = works.value.filter(w => (w.postId || w.id) !== id);
+    } else {
+      drafts.value = drafts.value.filter(d => (d.postId || d.id) !== id);
+    }
+    
+    console.log(`Успішно видалено`);
+  } catch (error) {
+    console.error("Помилка при видаленні:", error);
+  } finally {
+    closeDeleteModal();
+  }
+}
+
+const fetchItems = async () => {
+  if (!props.isAuthor) return 
+  
+  isLoading.value = true
+  try {
+    const baseUrl = config.public.apiBase || 'https://localhost:7014'
+    const isWorksTab = activeTab.value === 'works'
+    
+    if (isWorksTab) {
+      const data = await $fetch(`${baseUrl}/api/Posts/get-posts`, {
+        method: 'GET',
+        params: {
+          Username: props.username,
+          Filter: sortBy.value,
+          Ascending: !sortDesc.value
+        }
+      })
+      works.value = data
+    } else {
+      if (!token.value) throw new Error('Немає токена');
+      const data = await $fetch(`${baseUrl}/api/Posts/get-drafts`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token.value}` },
+        params: {
+          Filter: sortBy.value,
+          Ascending: !sortDesc.value
+        }
+      })
+      drafts.value = data
+    }
+  } catch (e) { 
+    console.error("Помилка завантаження даних:", e) 
+    if (activeTab.value === 'works') works.value = []
+    else drafts.value = []
+  } finally { 
+    isLoading.value = false 
+  }
+}
+
+// Слухаємо зміни табу, сортування та завантажуємо актуальні дані
+watch([activeTab, sortBy, sortDesc], () => {
+  fetchItems()
+}, { immediate: true })
+</script>
+
 <template>
   <div v-if="props.isAuthor" class="w-full relative font-sans">
     
@@ -6,16 +118,16 @@
       <!-- Tabs -->
       <div class="flex justify-center items-center text-lg">
         <button 
-          :class="['bg-transparent border-none cursor-pointer transition-colors duration-300', activeTab === 'works' ? 'text-[#4a9588] font-semibold' : 'text-[#333]']"
+          :class="['bg-transparent border-none cursor-pointer transition-colors duration-300', activeTab === 'works' ? 'text-mint font-semibold' : 'text-muted']"
           @click="activeTab = 'works'"
         >
           Твори
         </button>
 
         <template v-if="props.isOwner">
-          <span class="mx-[15px] text-[#333]">|</span>
+          <span class="mx-[15px] text-muted">|</span>
           <button 
-            :class="['bg-transparent border-none cursor-pointer transition-colors duration-300', activeTab === 'drafts' ? 'text-[#4a9588] font-semibold' : 'text-[#333]']"
+            :class="['bg-transparent border-none cursor-pointer transition-colors duration-300', activeTab === 'drafts' ? 'text-mint font-semibold' : 'text-muted']"
             @click="activeTab = 'drafts'"
           >
             Чернетки
@@ -25,7 +137,7 @@
       
       <!-- Sort -->
       <div class="absolute right-0 top-0 bottom-0 flex items-center">
-        <button class="bg-transparent border-none cursor-pointer text-base text-[#333] underline underline-offset-4" @click="isSortMenuOpen = true">
+        <button class="bg-transparent border-none cursor-pointer text-base text-muted underline underline-offset-4" @click="isSortMenuOpen = true">
           Сортувати
         </button>
 
@@ -50,9 +162,9 @@
           enter-from-class="opacity-0 -translate-y-2.5 scale-95"
           leave-to-class="opacity-0 -translate-y-2.5 scale-95"
         >
-          <div v-if="isSortMenuOpen" class="absolute top-full right-0 mt-1.5 bg-[#E4C1D3] border-4 border-[#2A7064] rounded-xl py-5 px-[30px] min-w-[260px] text-white shadow-2xl z-[1002]" @click.stop>
+          <div v-if="isSortMenuOpen" class="absolute top-full right-0 mt-1.5 bg-mauve border-4 border-mint-dark rounded-xl py-5 px-[30px] min-w-[260px] text-white shadow-2xl z-[1002]" @click.stop>
             <button
-              class="absolute top-[15px] right-[15px] bg-transparent border-none cursor-pointer text-[#4A3A41] p-0 flex items-center justify-center transition-opacity hover:opacity-70"
+              class="absolute top-[15px] right-[15px] bg-transparent border-none cursor-pointer text-muted p-0 flex items-center justify-center transition-opacity hover:opacity-70"
               @click="isSortMenuOpen = false"
               title="Закрити меню"
             >
@@ -61,7 +173,7 @@
               </svg>
             </button>
 
-            <h4 class="m-0 mb-[15px] font-medium text-xl text-[#4A3A41] pr-[25px]">Сортувати за:</h4>
+            <h4 class="m-0 mb-[15px] font-medium text-xl text-muted pr-[25px]">Сортувати за:</h4>
 
             <ul class="list-none p-0 m-0">
               <li class="flex items-center gap-3 mb-3 cursor-pointer text-lg text-white font-medium transition-opacity hover:opacity-80" @click="sortBy = 'Title'">
@@ -105,13 +217,13 @@
     >
       <div 
         :key="activeTab" 
-        class="flex flex-col gap-[15px] max-h-[550px] overflow-y-auto p-5 bg-[#FFF1DB] rounded-lg [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-[#FFE6BD] [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-[#7E4864] [&::-webkit-scrollbar-thumb]:rounded hover:[&::-webkit-scrollbar-thumb]:bg-[#61344B]"
+        class="flex flex-col gap-[15px] max-h-[550px] overflow-y-auto p-5 bg-cream-light rounded-lg [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-cream-light [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-plum-scroll [&::-webkit-scrollbar-thumb]:rounded hover:[&::-webkit-scrollbar-thumb]:bg-plum"
       >
         
-        <div v-if="isLoading && currentItems.length === 0" class="text-center text-base text-[#4A3A41] py-5">
+        <div v-if="isLoading && currentItems.length === 0" class="text-center text-base text-muted py-5">
           Завантаження {{ activeTab === 'works' ? 'творів' : 'чернеток' }}...
         </div>
-        <div v-else-if="!isLoading && currentItems.length === 0" class="text-center text-base text-[#4A3A41] py-5">
+        <div v-else-if="!isLoading && currentItems.length === 0" class="text-center text-base text-muted py-5">
           {{ activeTab === 'works' ? 'Творів' : 'Чернеток' }} не знайдено.
         </div>
         
@@ -126,7 +238,7 @@
           enter-from-class="opacity-0 translate-y-5 scale-95"
           leave-to-class="opacity-0 translate-y-5 scale-95"
         >
-          <div v-for="item in currentItems" :key="item.postId || item.id" class="bg-[#4f9689] border-4 border-[#1c4b43] rounded relative min-h-[140px] flex items-center justify-center box-border w-full">
+          <div v-for="item in currentItems" :key="item.postId || item.id" class="bg-mint border-4 border-mint-dark rounded relative min-h-[140px] flex items-center justify-center box-border w-full">
             
             <div class="text-center">
               <h3 class="m-0 mb-1 font-medium text-black text-lg">{{ item.title }}</h3>
@@ -145,14 +257,14 @@
               <!-- Кнопка 'Читати' для творів, 'Редагувати' для чернеток -->
               <button 
                 v-if="activeTab === 'works'" 
-                class="bg-[#1e4b6c] text-white border-none rounded-md py-2 px-[30px] font-sans text-base cursor-pointer transition-colors hover:bg-[#15364e] h-fit"
+                class="bg-mint-dark text-white border-none rounded-md py-2 px-[30px] font-sans text-base cursor-pointer transition-colors hover:bg-mint-hover h-fit"
               >
                 Читати
               </button>
               <button 
                 v-else 
                 @click="navigateTo(`/write/${item.postId || item.id}`)" 
-                class="bg-[#1e4b6c] text-white border-none rounded-md py-2 px-[30px] font-sans text-base cursor-pointer transition-colors hover:bg-[#15364e] h-fit"
+                class="bg-mint-light text-main border-none rounded-md py-2 px-[30px] font-sans text-base cursor-pointer transition-colors hover:bg-mint-hover h-fit"
               >
                 Редагувати
               </button>
@@ -160,7 +272,7 @@
               <!-- Кнопка 'Видалити' (для власника) -->
               <button 
                 v-if="props.isOwner"
-                class="bg-transparent border-2 border-[#1c4b43] rounded-full w-8 h-8 flex items-center justify-center text-[#1c4b43] cursor-pointer transition-all shrink-0 hover:bg-[#1c4b43] hover:text-[#4f9689] hover:scale-110"
+                class="bg-transparent border-2 border-mint-dark rounded-full w-8 h-8 flex items-center justify-center text-mint-dark cursor-pointer transition-all shrink-0 hover:bg-mint-dark hover:text-mint hover:scale-110"
                 @click="openDeleteModal(item)"
                 :title="activeTab === 'works' ? 'Видалити твір' : 'Видалити чернетку'"
               >
@@ -182,117 +294,3 @@
     />
   </div>
 </template>
-
-<script setup>
-import { ref, computed, watch } from 'vue'
-import DeletePost from './deletePost.vue' // Назва імпорту залишена твоєю, щоб не зламати проект
-
-const props = defineProps({
-  username: { type: String, required: true },
-  isOwner: { type: Boolean, default: false },
-  isAuthor: { type: Boolean, default: false } 
-})
-
-const config = useRuntimeConfig()
-const activeTab = ref('works')
-const isLoading = ref(false)
-
-const sortBy = ref('Title')
-const sortDesc = ref(false)
-const isSortMenuOpen = ref(false)
-
-// Зберігаємо обидва списки в пам'яті, щоб уникнути зайвих запитів при швидкому перемиканні
-const works = ref([])
-const drafts = ref([])
-
-// Обчислюємо, які дані наразі треба показувати
-const currentItems = computed(() => {
-  return activeTab.value === 'works' ? works.value : drafts.value
-})
-
-const isDeleteModalOpen = ref(false)
-const itemToDelete = ref(null) 
-
-const openDeleteModal = (item) => {
-  itemToDelete.value = item
-  isDeleteModalOpen.value = true
-}
-
-const closeDeleteModal = () => {
-  isDeleteModalOpen.value = false
-  itemToDelete.value = null
-}
-
-const handleDeleteConfirm = async () => {
-  if (!itemToDelete.value) return;
-  
-  try {
-    const baseUrl = config.public.apiBase || 'https://localhost:7014';
-    const token = useCookie('auth_token').value; 
-    const id = itemToDelete.value.postId || itemToDelete.value.id;
-
-    await $fetch(`${baseUrl}/api/Posts/${id}/delete-post`, {
-      method: 'POST', 
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    // Оновлюємо відповідний масив
-    if (activeTab.value === 'works') {
-      works.value = works.value.filter(w => (w.postId || w.id) !== id);
-    } else {
-      drafts.value = drafts.value.filter(d => (d.postId || d.id) !== id);
-    }
-    
-    console.log(`Успішно видалено`);
-  } catch (error) {
-    console.error("Помилка при видаленні:", error);
-  } finally {
-    closeDeleteModal();
-  }
-}
-
-const fetchItems = async () => {
-  if (!props.isAuthor) return 
-  
-  isLoading.value = true
-  try {
-    const baseUrl = config.public.apiBase || 'https://localhost:7014'
-    const isWorksTab = activeTab.value === 'works'
-    const token = useCookie('auth_token').value;
-    
-    if (isWorksTab) {
-      const data = await $fetch(`${baseUrl}/api/Posts/get-posts`, {
-        method: 'GET',
-        params: {
-          Username: props.username,
-          Filter: sortBy.value,
-          Ascending: !sortDesc.value
-        }
-      })
-      works.value = data
-    } else {
-      if (!token) throw new Error('Немає токена');
-      const data = await $fetch(`${baseUrl}/api/Posts/get-drafts`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` },
-        params: {
-          Filter: sortBy.value,
-          Ascending: !sortDesc.value
-        }
-      })
-      drafts.value = data
-    }
-  } catch (e) { 
-    console.error("Помилка завантаження даних:", e) 
-    if (activeTab.value === 'works') works.value = []
-    else drafts.value = []
-  } finally { 
-    isLoading.value = false 
-  }
-}
-
-// Слухаємо зміни табу, сортування та завантажуємо актуальні дані
-watch([activeTab, sortBy, sortDesc], () => {
-  fetchItems()
-}, { immediate: true })
-</script>

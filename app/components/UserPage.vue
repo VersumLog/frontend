@@ -38,7 +38,7 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
 </script>
 
 <template>
-  <div v-if="userData" class="min-h-screen bg-[#FDE9D1] text-[#04151F] font-sans">
+  <div v-if="userData" class="min-h-screen bg-cream text-main font-sans">
     <main class="mx-auto max-w-[1300px] px-4 py-8 md:py-[60px]">
 
       <div class="flex flex-col md:flex-row gap-8 md:gap-[60px] items-center md:items-start">
@@ -56,39 +56,32 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
             </div>
           </div>
           <div class="space-y-1">
-            <h2 class="text-2xl md:text-[32px] font-black leading-tight">{{ userData?.name }}</h2>
+            <h2 class="text-2xl break-all md:text-[32px] font-black leading-tight">{{ userData?.name }}</h2>
             <span class="text-lg md:text-xl text-gray-600 block">@{{ userData.username }}</span>
           </div>
         </div>
 
         <div class="flex-1 w-full flex flex-col gap-6 md:gap-8">
           <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-2">
-          <div class="flex gap-6 md:gap-10 text-xl md:text-2xl font-medium">
- 
-            <Statistics 
-                :works-count="userData.worksCount" 
-                :following-count="userData.followingCount" 
-                :followers-count="userData.followersCount" 
-              />
-          </div>
+            <div class="flex gap-6 md:gap-10 text-xl md:text-2xl font-medium">
+
+              <Statistics :works-count="userData.worksCount" :following-count="userData.followingCount"
+                :followers-count="userData.followersCount" />
+            </div>
           </div>
           <div
-            class="relative bg-[#FFE6B7] p-6 md:p-10 rounded-[30px] md:rounded-[40px] min-h-[150px] md:min-h-[180px] shadow-sm">
+            class="relative bg-cream-light p-6 md:p-10 rounded-[30px] md:rounded-[40px] min-h-[150px] md:min-h-[180px] shadow-sm">
             <span class="block font-extrabold text-xl md:text-24px mb-3 uppercase tracking-wide">Про мене:</span>
-            <p class="text-base md:text-xl leading-relaxed text-[#04151F] break-all sm:break-words whitespace-normal">
+            <p class="text-base md:text-xl leading-relaxed text-main break-all sm:break-words whitespace-normal">
               {{ userData.bio }}
             </p>
 
             <changeprofile v-if="isOwnProfile" :user-data="userData" @profile-updated="$emit('refresh-data')"
               class="absolute bottom-4 right-4 md:bottom-6 ">
             </changeprofile>
-            <subscribe 
-               v-if="!isOwnProfile" 
-                class="absolute -right-3 -bottom-3 md:-right-5 md:-bottom-5 z-10" 
-                :username="userData.username" 
-                :initial-is-following="userData.isFollowing" 
-                 @update-follow="handleFollowUpdate"
-/>
+            <subscribe v-if="!isOwnProfile" class="absolute -right-3 -bottom-3 md:-right-5 md:-bottom-5 z-10"
+              :username="userData.username" :initial-is-following="userData.isFollowing"
+              @update-follow="handleFollowUpdate" />
 
           </div>
 
@@ -98,13 +91,14 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
       <div class="mt-12 md:mt-16">
         <ProfileWritings :username="userData.username" :is-owner="userData.isOwner" :is-author="isAuthor" />
       </div>
-
-      <div v-if="isOwnProfile" class="mt-16 md:mt-20 mb-10 text-center">
+      <div v-if="isOwnProfile" class="mt-16 md:mt-20 mb-10 flex flex-row items-center justify-center gap-4">
         <deleteAccount />
-      </div>
 
-      <div v-if="isOwnProfile">
-        <button @click="useAuth().logout()">Вийти</button>
+        <button
+          class="bg-plum hover:bg-plum-hover text-white border-2 border-transparent py-2.5 px-6 text-base font-bold rounded-xl cursor-pointer shadow-md transition-all duration-200 active:scale-95 whitespace-nowrap"
+          @click="useAuth().logout()">
+          Вийти
+        </button>
       </div>
     </main>
     <CreatePost v-if="isAuthorProfile && isOwnProfile" />
@@ -113,14 +107,14 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
 
 <style scoped>
 .teal-btn {
-  background-color: #43A08E;
+  background-color: var(--color-mint);
   color: white;
-  border: 2px solid #368273;
+  border: 2px solid var(--color-mint-hover);
   padding: 12px 32px;
   border-radius: 15px;
   font-size: 18px;
   font-weight: bold;
-  box-shadow: 0 5px 0px #2D6A5F;
+  box-shadow: 0 5px 0px var(--color-mint-dark);
   transition: all 0.1s active;
 }
 
@@ -132,7 +126,7 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
 }
 
 .teal-btn:active {
-  box-shadow: 0 2px 0px #2D6A5F;
+  box-shadow: 0 2px 0px var(--color-mint-dark);
   transform: translateY(3px);
 }
 </style>
