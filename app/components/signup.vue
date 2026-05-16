@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+
 const nickname = ref('');
 const email = ref('');
 const password = ref('');
@@ -40,19 +42,19 @@ const handleSignup = async () => {
         email: email.value
       }
     });
-    
-  successMessage.value = "Реєстрація успішна! Перевірте пошту для підтвердження :)";
 
-   nickname.value = '';
-   email.value = '';
-   password.value = '';
-   confirmPassword.value = '';
-  
+    successMessage.value = "Реєстрація успішна! Перевірте пошту для підтвердження :)";
+
+    nickname.value = '';
+    email.value = '';
+    password.value = '';
+    confirmPassword.value = '';
+
   } catch (error: any) {
     if (error.status === 400 || error.status === 409) {
       errorMessage.value = "Цей нікнейм чи пошта вже існує";
       isNicknameTaken.value = true;
-      
+
       if (error.data?.errors) {
         errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
       } else if (error.data?.message) {
@@ -61,135 +63,53 @@ const handleSignup = async () => {
     } else {
       errorMessage.value = "Сталася помилка при реєстрації. Спробуйте пізніше.";
     }
-    
+
     console.error("Помилка при реєстрації:", error);
   }
 };
 </script>
 
 <template>
-  <div class="auth-card w-[80%] lg:w-[30vw] mx-auto">
+  <div
+    class="w-[80%] lg:w-[30vw] mx-auto bg-cream-dark p-10 rounded-[32px] relative shadow-[0_10px_25px_rgba(0,0,0,0.05)]">
     <div class="sign-up-tag"></div>
 
-    <h1 class="title">ВІТАЮ!</h1>
+    <h1 class="text-center text-[32px] font-black text-main my-10">ВІТАЮ!</h1>
 
-    <div class="inputs-group">
-      <input 
-        v-model="nickname" 
-        type="text" 
-        placeholder="Введіть нікнейм(малими літерами)" 
-        :class="{ 'input-error-border': isNicknameTaken }"
-        @input="isNicknameTaken = false" 
-      />
-      <input v-model="email" type="email" placeholder="Введіть email" />
-      <input v-model="password" type="password" placeholder="Введіть пароль" />
-      <input v-model="confirmPassword" type="password" placeholder="Введіть пароль ще раз" />
+    <div class="flex flex-col gap-[15px]">
+      <input v-model="nickname" type="text" placeholder="Введіть нікнейм(малими літерами)"
+        class="w-full py-4 px-6 rounded-2xl border-2 border-plum-light bg-input-bg text-main placeholder:text-muted/60 text-base box-border transition-all duration-200 focus:outline-none focus:border-mint focus:ring-2 focus:ring-mint/20 disabled:opacity-70 disabled:cursor-not-allowed"
+        :class="{ '!border-red-600 !ring-red-600/20': isNicknameTaken }" @input="isNicknameTaken = false" />
+      <input v-model="email" type="email" placeholder="Введіть email"
+        class="w-full py-4 px-6 rounded-2xl border-2 border-plum-light bg-input-bg text-base box-border transition-all duration-200 focus:outline focus:border-mint focus:outline-2 focus:outline-plum" />
+      <input v-model="password" type="password" placeholder="Введіть пароль"
+        class="w-full py-4 px-6 rounded-2xl border-2 border-plum-light bg-input-bg text-base box-border transition-all duration-200 focus:outline focus:border-mint focus:outline-2 focus:outline-plum" />
+      <input v-model="confirmPassword" type="password" placeholder="Введіть пароль ще раз"
+        class="w-full py-4 px-6 rounded-2xl border-2 border-plum-light bg-input-bg text-base box-border transition-all duration-200 focus:outline focus:border-mint focus:outline-2 focus:outline-plum" />
     </div>
 
-    <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-    
-    <p v-if="successMessage" class="success-text"> {{ successMessage }}</p>
+    <p v-if="errorMessage"
+      class="text-[#d9534f] bg-[#fce8e8] p-2.5 rounded-lg text-center text-sm mt-[15px] border border-[#d9534f]">
+      {{ errorMessage }}
+    </p>
 
-    <button class="main-btn" @click="handleSignup">Зареєструватися</button>
+    <p v-if="successMessage"
+      class="text-mint bg-mint-light p-3 rounded-lg text-center text-sm mt-[15px] border border-mint font-medium">
+      {{ successMessage }}
+    </p>
 
-    <div class="footer-link">
-      <button @click="$emit('login')">Вже маю обліковий запис</button>
+    <button
+      class="w-full bg-plum hover:bg-plum-hover text-white p-4 rounded-3xl border-none font-bold mt-[30px] cursor-pointer transition-opacity duration-200 hover:opacity-90"
+      @click="handleSignup">
+      Зареєструватися
+    </button>
+
+    <div class="text-center mt-5">
+      <button
+        class="bg-transparent border-none underline text-main cursor-pointer font-medium hover:opacity-80 transition-opacity"
+        @click="$emit('login')">
+        Вже маю обліковий запис
+      </button>
     </div>
   </div>
 </template>
-
-<style scoped>
-.input-error-border {
-  outline: 2px solid #d9534f !important;
-  border: 1px solid #d9534f !important;
-}
-
-.auth-card {
-  background-color: #EFD6AC;
-  padding: 40px;
-  border-radius: 32px;
-  position: relative;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-}
-
-.title {
-  text-align: center;
-  font-size: 32px;
-  font-weight: 900;
-  color: #04151F;
-  margin: 40px 0;
-}
-
-.inputs-group {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.error-text {
-  color: #d9534f;
-  background-color: #fce8e8;
-  padding: 10px;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 14px;
-  margin-top: 15px;
-  border: 1px solid #d9534f;
-}
-
-.success-text{
-  color:#28a745;
-  background-color:#eafaf1;
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 14px;
-  margin-top: 15px;
-  border: 1px solid #28a745;
-  font-weight: 500;
-}
-
-input {
-  padding: 16px 24px;
-  border-radius: 16px;
-  border: 1px solid transparent;
-  background: white;
-  font-size: 16px;
-  transition: all 0.2s ease;
-}
-
-input:focus {
-  outline: 2px solid #432534;
-}
-
-.main-btn {
-  width: 100%;
-  background-color: #432534;
-  color: white;
-  padding: 16px;
-  border-radius: 24px;
-  border: none;
-  font-weight: bold;
-  margin-top: 30px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.main-btn:hover {
-  opacity: 0.9;
-}
-
-.footer-link {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.footer-link button {
-  background: none;
-  border: none;
-  text-decoration: underline;
-  color: #04151F;
-  cursor: pointer;
-  font-weight: 500;
-}
-</style>

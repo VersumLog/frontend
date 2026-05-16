@@ -75,173 +75,71 @@ const handleLogin = async () => {
       navigateTo('/');
     }
   } catch (error: any) {
-
-    const status = error.status || error.response?.status;
-
     if (error.data?.errors) {
       errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
     } else {
       errorMessage.value = error.data?.message || "Не вдалося ввійти";
     }
-
     console.error("Помилка при логіні:", error);
   }
-
 };
 </script>
 
 <template>
-  <div class="auth-card w-[80%] lg:w-[30vw] mx-auto">
-    <div class="sign-up-tag">
+  <div class="w-[80%] lg:w-[30vw] mx-auto bg-cream-dark p-10 rounded-[32px] relative font-sans">
+    <div class="absolute top-5 left-5 flex items-center gap-2 text-main font-bold text-sm">
+      <!-- Тут може бути іконка чи тег, залишив блок для збереження структури -->
     </div>
 
-    <h1 class="title">З ПОВЕРНЕННЯМ!</h1>
+    <h1 class="text-center text-[32px] font-black text-main my-10">З ПОВЕРНЕННЯМ!</h1>
 
-    <div class="inputs-group">
-      <div class="input-wrapper">
+    <div class="flex flex-col gap-[15px]">
+      <!-- Поле Email / Нікнейм -->
+      <div class="flex flex-col gap-1.5">
         <input v-model="email" type="text" placeholder="Введіть нікнейм або email" @blur="handleEmailBlur"
           @input="emailFieldError = ''; isEmailValid = false"
-          :class="{ 'valid-field': isEmailValid, 'error-border': emailFieldError }" />
-        <span v-if="emailFieldError" class="error-msg">{{ emailFieldError }}</span>
+          class="w-full py-4 px-6 rounded-2xl border-2 border-plum-light bg-input-bg text-base box-border transition-all duration-200 focus:outline focus:border-mint focus:outline-2 focus:outline-plum"
+          :class="{ '!border-mint': isEmailValid, '!border-[#F44336]': emailFieldError }" />
+        <span v-if="emailFieldError" class="text-[#F44336] text-xs -mt-1 ml-3">{{ emailFieldError }}</span>
       </div>
 
-      <div class="input-wrapper">
+      <!-- Поле Паролю -->
+      <div class="flex flex-col gap-1.5">
         <input v-model="password" type="password" placeholder="Пароль" @blur="handlePasswordBlur"
           @input="passwordFieldError = ''; isPasswordValid = false"
-          :class="{ 'valid-field': isPasswordValid, 'error-border': passwordFieldError }" />
-        <span v-if="passwordFieldError" class="error-msg">{{ passwordFieldError }}</span>
+         class="w-full py-4 px-6 rounded-2xl border-2 border-plum-light bg-input-bg text-base box-border transition-all duration-200 focus:outline focus:border-mint focus:outline-2 focus:outline-plum"
+          :class="{ '!border-mint': isPasswordValid, '!border-[#F44336]': passwordFieldError }" />
+        <span v-if="passwordFieldError" class="text-[#F44336] text-xs -mt-1 ml-3">{{ passwordFieldError }}</span>
       </div>
     </div>
 
-    <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+    <!-- Загальна помилка від бекенду -->
+    <p v-if="errorMessage"
+      class="text-[#d9534f] bg-[#fce8e8] p-2.5 rounded-lg text-center text-sm mt-[15px] border border-[#d9534f]">
+      {{ errorMessage }}
+    </p>
 
-    <div class="forgot-password">
-      <button @click="$emit('forgot')">Забув(</button>
+    <!-- Забули пароль -->
+    <div class="mt-[15px] text-left">
+      <button @click="$emit('forgot')"
+        class="bg-transparent border-none underline text-main cursor-pointer text-sm p-0 transition-opacity hover:opacity-80">
+        Забув(
+      </button>
     </div>
 
-    <button class="main-btn" @click="handleLogin">Увійти</button>
+    <!-- Головна кнопка -->
+    <button
+      class="w-full bg-plum hover:bg-plum-hover text-white p-4 rounded-[24px] border-none font-bold mt-5 cursor-pointer transition-opacity duration-200 hover:opacity-90"
+      @click="handleLogin">
+      Увійти
+    </button>
 
-    <div class="footer-link">
-      <button @click="$emit('signup')">Ще не маєте акаунту? Створити</button>
+    <!-- Посилання внизу -->
+    <div class="text-center mt-5">
+      <button @click="$emit('signup')"
+        class="bg-transparent border-none underline text-main cursor-pointer transition-opacity hover:opacity-80">
+        Ще не маєте акаунту? Створити
+      </button>
     </div>
   </div>
 </template>
-
-<style scoped>
-.auth-card {
-  background-color: #EFD6AC;
-  padding: 40px;
-  border-radius: 32px;
-  position: relative;
-}
-
-.sign-up-tag {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #04151F;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.title {
-  text-align: center;
-  font-size: 32px;
-  font-weight: 900;
-  color: #04151F;
-  margin: 40px 0;
-}
-
-.inputs-group {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.input-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-input {
-  padding: 16px 24px;
-  border-radius: 16px;
-  border: 2px solid transparent;
-  background: white;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.valid-field {
-  border-color: #4CAF50 !important;
-}
-
-.error-border {
-  border-color: #F44336 !important;
-}
-
-.error-msg {
-  color: #F44336;
-  font-size: 12px;
-  margin-top: -10px;
-  margin-left: 12px;
-}
-
-.error-text {
-  color: #d9534f;
-  background-color: #fce8e8;
-  padding: 10px;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 14px;
-  margin-top: 15px;
-  border: 1px solid #d9534f;
-}
-
-.forgot-password {
-  margin-top: 15px;
-  text-align: left;
-}
-
-.forgot-password button {
-  background: none;
-  border: none;
-  text-decoration: underline;
-  color: #04151F;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-  padding: 0;
-}
-
-.main-btn {
-  width: 100%;
-  background-color: #432534;
-  color: white;
-  padding: 16px;
-  border-radius: 24px;
-  border: none;
-  font-weight: bold;
-  margin-top: 20px;
-  cursor: pointer;
-}
-
-.footer-link {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.footer-link button {
-  background: none;
-  border: none;
-  text-decoration: underline;
-  color: #04151F;
-  cursor: pointer;
-  font-family: inherit;
-}
-</style>

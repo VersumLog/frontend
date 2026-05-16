@@ -148,43 +148,66 @@ const publishPost = async () => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto flex flex-col gap-6 p-6 bg-[#FDF5E6] rounded-xl shadow-sm border border-[#e5d8c1]">
+  <div class="max-w-4xl mx-auto flex flex-col gap-6 p-6 bg-cream-dark rounded-xl shadow-sm border border-cream-input">
 
-    <!-- Селектор жанру -->
     <div class="relative self-start">
-      <div @click="isGenreOpen = !isGenreOpen"
-        class="cursor-pointer px-4 py-1 rounded-full border-2 border-[#c2b280] text-[#c2b280] font-semibold text-sm hover:bg-[#c2b280] hover:text-white transition-all flex items-center gap-2">
+      <div 
+        @click="isGenreOpen = !isGenreOpen"
+        class="cursor-pointer px-4 py-1.5 rounded-full border-2 border-plum text-plum font-bold text-sm hover:bg-plum hover:text-white transition-all flex items-center gap-2 active:scale-95"
+      >
         <span>{{ writing.genres[0] || 'Обрати жанр' }}</span>
-        <span class="text-[10px] transition-transform" :class="{ 'rotate-180': isGenreOpen }">▼</span>
+        <Icon 
+          name="lucide:chevron-down" 
+          class="w-4 h-4 transition-transform duration-200" 
+          :class="{ 'rotate-180': isGenreOpen }" 
+        />
       </div>
 
-      <!-- Випадаючий список -->
-      <div v-if="isGenreOpen"
-        class="absolute top-full left-0 mt-2 w-48 bg-white border border-[#d1c4ae] rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
-        <div v-for="genre in genres" :key="genre" @click="selectGenre(genre)"
-          class="px-4 py-2 hover:bg-[#FDF5E6] cursor-pointer text-[#5c5446] transition-colors border-b border-[#f3eee5] last:border-0">
-          {{ genre }}
+      <transition
+        enter-active-class="transition-all duration-200 ease-out"
+        leave-active-class="transition-all duration-150 ease-in"
+        enter-from-class="opacity-0 translate-y-1"
+        leave-to-class="opacity-0 translate-y-1"
+      >
+        <div 
+          v-if="isGenreOpen"
+          class="absolute top-full left-0 mt-2 w-48 bg-input-bg border-2 border-cream-input rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-plum-scroll/40 [&::-webkit-scrollbar-thumb]:rounded"
+        >
+          <div 
+            v-for="genre in genres" 
+            :key="genre" 
+            @click="selectGenre(genre)"
+            class="px-4 py-2.5 hover:bg-cream-light cursor-pointer text-main font-medium transition-colors border-b border-cream-input last:border-0"
+          >
+            {{ genre }}
+          </div>
         </div>
-      </div>
+      </transition>
     </div>
 
-    <input v-model="writing.title"
-      class="text-3xl font-bold bg-transparent border-b-2 border-[#d1c4ae] focus:border-[#c2b280] outline-none py-2"
-      placeholder="Заголовок" />
+    <input 
+      v-model="writing.title"
+      type="text"
+      class="text-3xl font-black bg-transparent border-b-2 border-cream-input text-main placeholder:text-muted/40 focus:border-mint focus:outline-none py-2 transition-colors duration-200"
+      placeholder="Заголовок" 
+    />
 
-    <textarea v-model="writing.description" rows="3"
-      class="w-full p-4 rounded-lg border border-[#d1c4ae] focus:outline-none focus:ring-1 focus:ring-[#c2b280] resize-none"
-      placeholder="Короткий опис твого твору..."></textarea>
+    <textarea 
+      v-model="writing.description" 
+      rows="3"
+      class="w-full p-4 rounded-xl border-2 border-cream-input bg-input-bg text-main placeholder:text-muted/50 focus:outline-none focus:border-mint focus:ring-2 focus:ring-mint/20 resize-none transition-all duration-200"
+      placeholder="Короткий опис твого твору..."
+    ></textarea>
 
-    <div class="h-[500px] border border-[#d1c4ae] bg-white rounded-lg overflow-hidden shadow-inner flex flex-col">
+    <div class="h-[500px] border-2 border-cream-input bg-input-bg rounded-xl overflow-hidden shadow-sm flex flex-col">
 
-      <div class="sticky top-0 z-10 bg-white border-b border-[#d1c4ae]">
+      <div class="sticky top-0 z-10 bg-cream-light border-b-2 border-cream-input">
         <ToolBar :editor="editor" />
       </div>
 
       <ClientOnly>
-        <div class="flex-1 overflow-y-auto custom-scrollbar">
-          <EditorContent :editor="editor" class="p-6 min-h-full" />
+        <div class="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-plum-scroll [&::-webkit-scrollbar-thumb]:rounded hover:[&::-webkit-scrollbar-thumb]:bg-plum-scroll-hover">
+          <EditorContent :editor="editor" class="p-6 min-h-full bg-input-bg text-main focus:outline-none" />
         </div>
       </ClientOnly>
 
@@ -197,7 +220,7 @@ const publishPost = async () => {
 
       <Transition name="toast">
         <div v-if="showSuccessMessage"
-          class="fixed bottom-8 right-8 z-[120] bg-[#8A9A5B] text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 border border-[#7A8A4B]">
+          class="fixed bottom-8 right-8 z-[120] bg-muted text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 border border-muted">
 
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -208,12 +231,12 @@ const publishPost = async () => {
 
       <div class="flex gap-4">
         <button @click="updateDraft"
-          class="px-6 py-2 border-2 border-[#c2b280] text-[#c2b280] font-bold rounded-lg hover:bg-[#c2b280] hover:text-white transition-all">
+          class="px-6 py-2 border-2 border-cream-dark text-muted font-bold rounded-lg hover:bg-cream-dark hover:text-white transition-all">
           Зберегти чернетку
         </button>
         <button 
         @click="publishPost"
-          class="px-6 py-2 bg-[#c2b280] text-white font-bold rounded-lg hover:bg-[#b1a170] transition-all shadow-md">
+          class="px-6 py-2 bg-cream-dark text-white font-bold rounded-lg hover:bg-cream-dark hover:text-main transition-all shadow-md">
           Опублікувати
         </button>
       </div>
@@ -221,11 +244,11 @@ const publishPost = async () => {
     <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
     <div v-if="showCancelModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40">
-      <div class="bg-[#C2B280] p-8 rounded-xl text-center text-white max-w-sm shadow-2xl">
+      <div class="bg-cream-dark p-8 rounded-xl text-center text-white max-w-sm shadow-2xl">
         <h3 class="text-xl font-bold mb-6">Ви впевнені, що хочете вийти?</h3>
         <div class="flex flex-col gap-3">
           <button @click="navigateTo(`/profile/${nickname}`)"
-            class="w-full py-2 bg-white text-[#C2B280] rounded-lg font-bold">Так, вийти</button>
+            class="w-full py-2 bg-white text-cream-dark rounded-lg font-bold">Так, вийти</button>
           <button @click="showCancelModal = false" class="w-full py-2 border border-white rounded-lg">Скасувати</button>
         </div>
       </div>
