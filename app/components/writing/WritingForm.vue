@@ -335,15 +335,13 @@ const publishPost = async () => {
 
 <style>
 .has-description {
-  background-color: var(--color-plum-light, rgba(221, 214, 254, 0.4)); 
-  border-bottom: 2px dashed var(--color-plum, #6d28d9);
-  border-radius: 2px;
+  background-color: var(--color-mint-light); 
   cursor: help;
   transition: background-color 0.2s ease;
 }
 
 .has-description:hover {
-  background-color: var(--color-mint-light, rgba(52, 211, 153, 0.3));
+  background-color: var(--color-mint);
 }
 
 .tiptap p.is-editor-empty:first-child::before {
