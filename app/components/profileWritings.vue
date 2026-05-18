@@ -67,44 +67,40 @@ const handleDeleteConfirm = async () => {
 
 const fetchItems = async () => {
   if (!props.isAuthor) return 
-  
+
   isLoading.value = true
   try {
     const baseUrl = config.public.apiBase || 'https://localhost:7014'
     const isWorksTab = activeTab.value === 'works'
     
+    const queryParams = {
+      filter: sortBy.value,
+      ascending: !sortDesc.value
+    }
+
     if (isWorksTab) {
-      const data = await $fetch(`${baseUrl}/api/Posts/get-posts`, {
+      works.value = await $fetch(`${baseUrl}/api/posts/user/${props.username}`, {
         method: 'GET',
-        params: {
-          Username: props.username,
-          Filter: sortBy.value,
-          Ascending: !sortDesc.value
-        }
+        params: queryParams
       })
-      works.value = data
     } else {
-      if (!token.value) throw new Error('Немає токена');
-      const data = await $fetch(`${baseUrl}/api/Posts/get-drafts`, {
+      if (!token.value) throw new Error('Немає токена авторизації')
+
+      drafts.value = await $fetch(`${baseUrl}/api/posts/drafts`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token.value}` },
-        params: {
-          Filter: sortBy.value,
-          Ascending: !sortDesc.value
-        }
+        params: queryParams
       })
-      drafts.value = data
     }
   } catch (e) { 
     console.error("Помилка завантаження даних:", e) 
-    if (activeTab.value === 'works') works.value = []
+    if (isWorksTab) works.value = []
     else drafts.value = []
   } finally { 
     isLoading.value = false 
   }
 }
 
-// Слухаємо зміни табу, сортування та завантажуємо актуальні дані
 watch([activeTab, sortBy, sortDesc], () => {
   fetchItems()
 }, { immediate: true })
