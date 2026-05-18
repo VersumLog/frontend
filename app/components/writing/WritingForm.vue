@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { useEditor, EditorContent } from '@tiptap/vue-3'
+import { BubbleMenu } from '@tiptap/vue-3/menus' 
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Heading from '@tiptap/extension-heading'
-import ToolBar from './ToolBar.vue';
+import ToolBar from './ToolBar.vue'
+import { DescriptionMark } from './description' 
 
-const config = useRuntimeConfig();
-const { token, nickname } = useAuth();
-const errorMessage = ref('');
+const config = useRuntimeConfig()
+const { token, nickname, isLoggedIn } = useAuth()
+const errorMessage = ref('')
 
 const props = defineProps<{
   postId: string | number;
@@ -27,7 +29,74 @@ const writing = reactive({
 const genres = ref<string[]>([]);
 const isGenreOpen = ref(false);
 
+const editor = useEditor({
+  content: props.initialContent || '',
+  extensions: [
+    Underline,
+    StarterKit.configure({
+      heading: {
+        levels: [1, 2],
+      },
+    }),
+    DescriptionMark,
+  ],
+  editorProps: {
+    attributes: {
+      class: 'prose prose-stone max-w-none focus:outline-none min-h-[400px]',
+    },
+  },
+  onUpdate: ({ editor }) => {
+    writing.content = editor.getHTML()
+  },
+})
+
+
+const descriptionInput = ref('')
+const isEditing = ref(false)
+
+const currentDescription = computed(() => {
+  if (!editor.value) return ''
+  return editor.value.getAttributes('description').text || ''
+})
+
+watch(currentDescription, (newVal) => {
+  descriptionInput.value = newVal
+  if (!newVal) isEditing.value = false
+})
+
+const handleSaveDescription = () => {
+  if (!editor.value || !descriptionInput.value.trim()) return
+  editor.value.chain().focus().setDescription(descriptionInput.value.trim()).run()
+  isEditing.value = false
+}
+
+const handleRemoveDescription = () => {
+  if (!editor.value) return
+  editor.value.chain().focus().unsetDescription().run()
+  descriptionInput.value = ''
+  isEditing.value = false
+}
+
+watch(() => props.initialContent, (newContent) => {
+  if (editor.value && newContent !== editor.value.getHTML()) {
+    editor.value.commands.setContent(newContent || '');
+    writing.content = newContent || '';
+  }
+}, { immediate: true });
+
+watch(() => props.initialTitle, (newTitle) => {
+  writing.title = newTitle || '';
+});
+
+watch(() => props.initialGenre, (newGenre) => {
+  writing.genres = newGenre ? [newGenre] : [];
+});
+
 onMounted(async () => {
+  if (!isLoggedIn.value) {
+    navigateTo('/register');
+    return;
+  }
   try {
     const data = await $fetch<string[]>(`${config.public.apiBase}/api/posts/get-genres`);
     genres.value = data;
@@ -58,41 +127,6 @@ const selectGenre = (genre: string) => {
   writing.genres = [genre];
   isGenreOpen.value = false;
 };
-
-const editor = useEditor({
-  content: props.initialContent || '',
-  extensions: [
-    Underline,
-    StarterKit.configure({
-      heading: {
-        levels: [1, 2],
-      },
-    }),
-  ],
-  editorProps: {
-    attributes: {
-      class: 'prose prose-stone max-w-none focus:outline-none min-h-[400px]',
-    },
-  },
-  onUpdate: ({ editor }) => {
-    writing.content = editor.getHTML()
-  },
-})
-
-watch(() => props.initialContent, (newContent) => {
-  if (editor.value && newContent !== editor.value.getHTML()) {
-    editor.value.commands.setContent(newContent || '');
-    writing.content = newContent || '';
-  }
-}, { immediate: true });
-
-watch(() => props.initialTitle, (newTitle) => {
-  writing.title = newTitle || '';
-});
-
-watch(() => props.initialGenre, (newGenre) => {
-  writing.genres = newGenre ? [newGenre] : [];
-});
 
 const showCancelModal = ref(false)
 const isSaving = ref(false)
@@ -206,7 +240,51 @@ const publishPost = async () => {
       </div>
 
       <ClientOnly>
-        <div class="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-plum-scroll [&::-webkit-scrollbar-thumb]:rounded hover:[&::-webkit-scrollbar-thumb]:bg-plum-scroll-hover">
+        <div class="flex-1 overflow-y-auto relative [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-plum-scroll [&::-webkit-scrollbar-thumb]:rounded hover:[&::-webkit-scrollbar-thumb]:bg-plum-scroll-hover">
+          
+          <BubbleMenu
+            v-if="editor"
+            :editor="editor"
+            :tippy-options="{ duration: 150, placement: 'top' }"
+            class="z-50"
+          >
+            <div class="flex items-center gap-2 bg-cream border-2 border-cream-input shadow-xl p-2 rounded-xl max-w-[90vw] sm:max-w-md">
+              
+              <template v-if="currentDescription && !isEditing">
+                <div class="flex items-center gap-2 px-2 py-1 max-w-[180px] sm:max-w-xs overflow-hidden text-ellipsis whitespace-nowrap text-main text-sm">
+                  <Icon name="lucide:notebook-tabs" class="text-plum flex-shrink-0 w-4 h-4" />
+                  <span class="truncate font-medium text-xs">{{ currentDescription }}</span>
+                </div>
+                <button @click="isEditing = true" class="p-1 text-main hover:bg-plum/10 rounded-lg transition-colors">
+                  <Icon name="lucide:pencil" class="w-4 h-4" />
+                </button>
+                <button @click="handleRemoveDescription" class="p-1 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                  <Icon name="lucide:trash-2" class="w-4 h-4" />
+                </button>
+              </template>
+
+              <template v-else>
+                <input
+                  v-model="descriptionInput"
+                  type="text"
+                  placeholder="Додати опис до слова..."
+                  class="px-3 py-1 text-sm bg-input-bg text-main rounded-lg border border-cream-input focus:outline-none focus:border-mint w-40 sm:w-56"
+                  @keydown.enter="handleSaveDescription"
+                />
+                <button 
+                  @click="handleSaveDescription" 
+                  class="p-1 bg-mint text-white hover:bg-mint-dark rounded-lg transition-colors"
+                  :disabled="!descriptionInput.trim()"
+                >
+                  <Icon name="lucide:check" class="w-4 h-4" />
+                </button>
+                <button v-if="currentDescription" @click="isEditing = false" class="p-1 bg-cream-light text-main rounded-lg transition-colors">
+                  <Icon name="lucide:x" class="w-4 h-4" />
+                </button>
+              </template>
+            </div>
+          </BubbleMenu>
+
           <EditorContent :editor="editor" class="p-6 min-h-full bg-input-bg text-main focus:outline-none" />
         </div>
       </ClientOnly>
@@ -221,7 +299,6 @@ const publishPost = async () => {
       <Transition name="toast">
         <div v-if="showSuccessMessage"
           class="fixed bottom-8 right-8 z-[120] bg-muted text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 border border-muted">
-
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
@@ -257,6 +334,16 @@ const publishPost = async () => {
 </template>
 
 <style>
+.has-description {
+  background-color: var(--color-mint-light); 
+  cursor: help;
+  transition: background-color 0.2s ease;
+}
+
+.has-description:hover {
+  background-color: var(--color-mint);
+}
+
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
