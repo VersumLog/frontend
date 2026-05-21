@@ -88,7 +88,7 @@ const saveBio = async () => {
       class="absolute -right-4 bottom-2 z-10 h-16 w-16 cursor-pointer border-none bg-transparent transition-transform duration-200 hover:scale-110 focus:outline-none"
       @click="openModal"
     >
-      <img src="./pen.png" alt="Edit" class="h-full w-full object-contain" />
+      <img src="@/assets/pen.png" alt="Edit" class="h-full w-full object-contain" />
     </button>
 
     <Transition 

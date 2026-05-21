@@ -1,23 +1,15 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import BecomeAuthor from './become_author.vue';
-import AuthorBadge from './author_badge.vue';
-import Statistics from './statistics.vue';
-import CreatePost from './CreatePost.vue';
-import ProfileWritings from './profileWritings.vue';
+import BecomeAuthor from '@/components/profile/become_author.vue';
+import AuthorBadge from '@/components/profile/author_badge.vue';
+import Statistics from '@/components/profile/statistics.vue';
+import CreatePost from '~/components/posts/CreatePost.vue';
+import ProfileWritings from '@/components/profile/profileWritings.vue';
+import ChangeProfile from '@/components/profile/changeprofile.vue';
+import Subscribe from '@/components/profile/subscribe.vue';
+import DeleteAccount from '@/components/profile/deleteAccount.vue';
 
-interface UserProfile {
-  username: string;
-  name: string;
-  bio: string;
-  createdAt: string;
-  isAuthor: boolean;
-  isOwner: boolean;
-  isFollowing?: boolean;
-  worksCount: number;
-  followingCount: number;
-  followersCount: number;
-}
+import type { UserProfile } from '@/types/profile';
 
 const props = defineProps<{
   userData?: UserProfile
@@ -52,7 +44,7 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
               <span class="text-[80px] md:text-[100px]">👤</span>
             </div>
             <div class="absolute bottom-2 right-6 md:bottom-4 md:right-6">
-              <author_badge v-if="isAuthorProfile" :username="userData.username" :is-owner="isOwnProfile" />
+              <AuthorBadge v-if="isAuthorProfile" :username="userData.username" :is-owner="isOwnProfile" />
             </div>
           </div>
           <div class="space-y-1">
@@ -68,6 +60,11 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
               <Statistics :works-count="userData.worksCount" :following-count="userData.followingCount"
                 :followers-count="userData.followersCount" />
             </div>
+            <div class="w-full sm:w-auto">
+              <template v-if="isOwnProfile">
+                <BecomeAuthor v-if="!isAuthorProfile" class="w-full sm:w-auto" />
+              </template>
+            </div>
           </div>
           <div
             class="relative bg-cream-light p-6 md:p-10 rounded-[30px] md:rounded-[40px] min-h-[150px] md:min-h-[180px] shadow-sm">
@@ -76,10 +73,10 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
               {{ userData.bio }}
             </p>
 
-            <changeprofile v-if="isOwnProfile" :user-data="userData" @profile-updated="$emit('refresh-data')"
+            <ChangeProfile v-if="isOwnProfile" :user-data="userData" @profile-updated="$emit('refresh-data')"
               class="absolute bottom-4 right-4 md:bottom-6 ">
-            </changeprofile>
-            <subscribe v-if="!isOwnProfile" class="absolute -right-3 -bottom-3 md:-right-5 md:-bottom-5 z-10"
+            </ChangeProfile>
+            <Subscribe v-if="!isOwnProfile" class="absolute -right-3 -bottom-3 md:-right-5 md:-bottom-5 z-10"
               :username="userData.username" :initial-is-following="userData.isFollowing"
               @update-follow="handleFollowUpdate" />
 
@@ -92,7 +89,7 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
         <ProfileWritings :username="userData.username" :is-owner="userData.isOwner" :is-author="isAuthor" />
       </div>
       <div v-if="isOwnProfile" class="mt-16 md:mt-20 mb-10 flex flex-row items-center justify-center gap-4">
-        <deleteAccount />
+        <DeleteAccount />
 
         <button
           class="bg-plum hover:bg-plum-hover text-white border-2 border-transparent py-2.5 px-6 text-base font-bold rounded-xl cursor-pointer shadow-md transition-all duration-200 active:scale-95 whitespace-nowrap"

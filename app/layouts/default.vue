@@ -1,4 +1,14 @@
 <script setup lang="ts">
+const { isLoggedIn } = useAuth();
+const { startConnection, stopConnection } = useSignalR();
+
+watch(isLoggedIn, (loggedIn) => {
+  if (loggedIn) {
+    startConnection();
+  } else {
+    stopConnection();
+  }
+}, { immediate: true });
 </script>
 
 <template>

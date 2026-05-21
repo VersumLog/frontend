@@ -23,6 +23,14 @@ export const DescriptionMark = Mark.create({
           return { 'data-description': attributes.text }
         },
       },
+      id: {
+        default: null,
+        parseHTML: element => element.getAttribute('id'),
+        renderHTML: attributes => {
+          if (!attributes.id) return {}
+          return { id: attributes.id }
+        },
+      },
     }
   },
 
@@ -31,7 +39,11 @@ export const DescriptionMark = Mark.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['span', mergeAttributes(HTMLAttributes, { class: 'has-description' }), 0]
+    return ['span', mergeAttributes(HTMLAttributes, {
+      class: 'has-description',
+      id: HTMLAttributes.id || `word-${Math.random().toString(36).slice(2, 11)}`,
+      description: HTMLAttributes.description
+    }), 0]
   },
 
   addCommands() {

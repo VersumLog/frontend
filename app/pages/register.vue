@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import Signup from '@/components/auth/signup.vue';
+import Login from '@/components/auth/login.vue';  
+import Forgotpass from '@/components/auth/forgotpass.vue';
 
 const authMode = ref<'login' | 'signup' | 'forgot'>('signup')
 

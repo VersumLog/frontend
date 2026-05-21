@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import { onMounted, ref } from 'vue';
-
-interface UserProfile {
-  username: string;
-  name: string;
-  bio: string;
-  createdAt: string;
-  isOwner: boolean;
-}
-
+import UserPage from '@/components/profile/UserPage.vue';
 const route = useRoute();
 const username = route.params.username;
 const config = useRuntimeConfig();

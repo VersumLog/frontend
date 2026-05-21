@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import DraftModal from '@/components/posts/writing/DraftModal.vue';
 const isModalOpen = ref(false);
 </script>
 

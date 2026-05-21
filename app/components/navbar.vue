@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import NotificationDropdown from './notifications/NotificationDropdown.vue';
 
 const { isLoggedIn, nickname } = useAuth();
 const colorMode = useColorMode()
@@ -34,9 +35,8 @@ const profilePath = computed(() => {
 
         <button @click="toggleDark"
           class=" items-center cursor-pointer no-underline text-white transition-opacity duration-200 hover:opacity-80"
-          active-class="!text-main"
-          title="Змінити тему">
-          <Icon :name="colorMode.value === 'dark' ? 'lucide:moon' : 'lucide:sun'"  class="w-6 h-6 sm:w-7 sm:h-7"/>
+          active-class="!text-main" title="Змінити тему">
+          <Icon :name="colorMode.value === 'dark' ? 'lucide:moon' : 'lucide:sun'" class="w-6 h-6 sm:w-7 sm:h-7" />
         </button>
         <!-- Збережене -->
         <NuxtLink to="/saved"
@@ -55,13 +55,8 @@ const profilePath = computed(() => {
         </NuxtLink>
 
         <!-- Сповіщення -->
-        <NuxtLink to="/notifications"
-          class="flex flex-col items-center relative cursor-pointer no-underline text-white transition-opacity duration-200 hover:opacity-80"
-          active-class="!text-main">
-          <Icon name="lucide:bell" class="w-6 h-6 sm:w-7 sm:h-7" />
-          <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-plum-light"></span>
-          <span class="hidden sm:block text-xs font-semibold mt-1.25">Сповіщення</span>
-        </NuxtLink>
+        <NotificationDropdown />
+        
 
         <!-- Профіль / Вхід -->
         <NuxtLink :to="profilePath"
@@ -72,9 +67,7 @@ const profilePath = computed(() => {
             {{ isLoggedIn ? 'Профіль' : 'Увійти' }}
           </span>
         </NuxtLink>
-
       </div>
-
     </div>
   </nav>
 </template>
