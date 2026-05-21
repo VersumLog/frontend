@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import type { PostGetDto } from '@/types/post';
 import WordPopover from '@/components/posts/reading/WordPopover.vue';
 
@@ -7,6 +7,7 @@ const props = defineProps<{
   post: PostGetDto;
 }>();
 
+const route = useRoute();
 const activeWord = ref('');
 const activeDescription = ref('');
 const activeAnchorId = ref('');
@@ -17,7 +18,7 @@ const handleContentClick = (event: MouseEvent) => {
   const descriptionElement = target.closest('.has-description');
   
   if (descriptionElement) {
-    const descriptionText = descriptionElement.getAttribute('description') || descriptionElement.getAttribute('data-description');
+    const descriptionText = descriptionElement.getAttribute('data-description');
     const id = descriptionElement.getAttribute('id');
     
     if (descriptionText && id) {
@@ -28,6 +29,27 @@ const handleContentClick = (event: MouseEvent) => {
     }
   }
 };
+
+const scrollToAnchor = async () => {
+  await nextTick();
+  
+  const hash = route.hash;
+  if (!hash) return;
+
+  const element = document.querySelector(hash);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+  }
+};
+
+onMounted(() => {
+  scrollToAnchor();
+});
+
+watch(() => props.post, () => {
+  scrollToAnchor();
+});
 </script>
 
 <template>
