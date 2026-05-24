@@ -14,14 +14,17 @@ const { token } = useAuth();
 
 const isAdding = ref(false);
 const isSavedSuccessfully = ref(false);
+const errorMessage = ref('');
 
 const addToDictionary = async () => {
   isAdding.value = true;
+  errorMessage.value = '';
   try {
-    await $fetch(`${config.public.apiBase}/api/dict/${props.postId}/add-phrase`, {
+    await $fetch(`${config.public.apiBase}/api/dict/add-phrase`, {
       method: 'POST',
       headers: token.value ? { 'Authorization': `Bearer ${token.value}` } : {},
       body: {
+        postId: props.postId,
         phrase: props.word,
         description: props.description,
         anchorId: props.anchorId
@@ -29,8 +32,14 @@ const addToDictionary = async () => {
     });
     isSavedSuccessfully.value = true;
     setTimeout(() => { isSavedSuccessfully.value = false; }, 2000);
-  } catch (e) {
-    console.error('Не вдалося зберегти слово:', e);
+  } catch (error: any) {
+    if (error.data?.errors) {
+      errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
+    } else if (error.data?.message) {
+      errorMessage.value = error.data.message;
+    }
+
+    console.error('Не вдалося зберегти слово:', error);
   } finally {
     isAdding.value = false;
   }
@@ -64,6 +73,8 @@ const addToDictionary = async () => {
               {{ description }}
             </p>
 
+            <p v-if="errorMessage" class="error-text text-red-500">{{ errorMessage }}</p>
+
             <button @click="addToDictionary" :disabled="isAdding || isSavedSuccessfully"
               class="w-full py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
               :class="isSavedSuccessfully
@@ -72,7 +83,7 @@ const addToDictionary = async () => {
               <Icon :name="isSavedSuccessfully ? 'lucide:check' : isAdding ? 'svg-spinners:180-ring' : 'lucide:plus'"
                 class="w-4 h-4" />
               <span>{{ isSavedSuccessfully ? 'Збережено в словник!' : isAdding ? 'Зберігаємо...' : 'Додати до словника'
-                }}</span>
+              }}</span>
             </button>
           </div>
         </div>

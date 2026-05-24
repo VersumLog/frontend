@@ -20,13 +20,16 @@ const fetchDictionary = async () => {
     isLoading.value = false;
   }
 };
-// TODO
+
 const deleteWord = async (id: string | number) => {
   words.value = words.value.filter(w => w.id !== id);
   try {
     await $fetch(`${config.public.apiBase}/api/dict/delete-phrase`, {
-      method: 'DELETE',
+      method: 'POST',
       headers: token.value ? { 'Authorization': `Bearer ${token.value}` } : {},
+      body: {
+        id: id
+      }
     });
   } catch (e) {
     console.error('Не вдалося видалити слово', e);

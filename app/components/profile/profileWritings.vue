@@ -206,7 +206,7 @@ watch([activeTab, sortBy, sortDesc], () => {
       leave-active-class="transition-opacity duration-300 ease-in" enter-from-class="opacity-0"
       leave-to-class="opacity-0">
       <div :key="activeTab"
-        class="flex flex-col gap-[15px] max-h-[750px] overflow-y-auto p-5 bg-cream-light rounded-lg [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-cream-light [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-plum-scroll [&::-webkit-scrollbar-thumb]:rounded hover:[&::-webkit-scrollbar-thumb]:bg-plum">
+        class="flex flex-col gap-[15px] max-h-[1500px] overflow-y-auto p-5 bg-cream-light rounded-lg [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-cream-light [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-plum-scroll [&::-webkit-scrollbar-thumb]:rounded hover:[&::-webkit-scrollbar-thumb]:bg-plum">
 
         <div v-if="isLoading && currentItems.length === 0" class="text-center text-base text-muted py-5">
           Завантаження {{ activeTab === 'works' ? 'творів' : 'чернеток' }}...
