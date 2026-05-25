@@ -1,155 +1,156 @@
-<script setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useAuth } from '~/composables/useAuth';
+import type { PostGetDto } from '@/types/post';
+import PostCard from '@/components/posts/PostCard.vue';
 
-const isLoggedIn = useAuth().isLoggedIn;
-const nickname =  useAuth().nickname;
+const { token } = useAuth();
+const config = useRuntimeConfig();
+const errorMessage = ref('');
 
-// Стан для модального вікна
-const selectedPost = ref(null);
+const posts = ref<PostGetDto[]>([]);
+const isLoading = ref(true);
+const isLoadingMore = ref(false);
+const hasMore = ref(true);
+const limit = 20;
 
-const posts = ref([
-  {
-    id: 1,
-    title: "Тіні старого міста",
-    description: "Містика на вулицях вечірнього Львова.",
-    content: "Сонце сідало за Ратушу, залишаючи довгі тіні на бруківці площі Ринок. Здавалося, що старі кам'яниці перешіптуються між собою, згадуючи часи, коли вулицями ще їздили карети. Я щільніше закутався в пальто і пришвидшив крок, відчуваючи чийсь погляд у спину. Вітер доносив запах кави та вогкості, а десь вдалині пролунав звук, схожий на скрип старих дверей, яких тут давно не мало бути...",
-    authorName: "urban_writer",
-    createdAt: new Date(Date.now() - 86400000).toISOString()
-  },
-  {
-    id: 2,
-    title: "Кібер-Едем: Розділ 1",
-    description: "Наукова фантастика про світ без емоцій.",
-    content: "Неонове світло відбивалося в калюжах сектору 4. Система вимагала оновлення статусу, але мій нейроінтерфейс мовчав уже третю добу. Вони думають, що змогли відключити наші почуття оновленням прошивки. Вони помиляються. Кожен спалах світла, кожен шум вентиляції — це нагадування про те, що ми ще живі. У світі, де все вимірюється байтами, справжній гнів став останньою аналоговою розкішшю.",
-    authorName: "neon_samurai",
-    createdAt: new Date(Date.now() - 172800000).toISOString()
-  },
-  {
-    id: 3,
-    title: "Останній лист ельфійського короля",
-    description: "Фентезійна мініатюра.",
-    content: "Ліси вмирають, мій друже. Магія покидає це царство разом із першим снігом. Я залишаю цей пергамент під корінням Великого Дуба в надії, що колись, через тисячі років, хтось знайде його і згадає епоху, коли дерева вміли говорити. Ми йдемо на Захід, туди, де зорі торкаються моря, але наше коріння назавжди залишиться в цій попелястій землі.",
-    authorName: "elven_scribe",
-    createdAt: new Date(Date.now() - 432000000).toISOString()
-  },
-  {
-    id: 4,
-    title: "Шепіт зірок",
-    description: "Подорож за межі відомого всесвіту.",
-    content: "Двигуни працювали на мінімумі. Попереду була лише порожнеча, але сенсори вловлювали дивну вібрацію. Це не був космічний шум. Це була мелодія, яку співали мертві зірки.",
-    authorName: "astro_explorer",
-    createdAt: new Date(Date.now() - 600000000).toISOString()
+// Реф на елемент-тригер у низу сторінки
+const observerTarget = ref<HTMLElement | null>(null);
+let observer: IntersectionObserver | null = null;
+
+const fetchFeed = async (isInitial = true) => {
+  if (!hasMore.value && !isInitial) return;
+
+  if (isInitial) {
+    isLoading.value = true;
+  } else {
+    isLoadingMore.value = true;
   }
-]);
 
-const openPost = (post) => {
-  selectedPost.value = post;
-  document.body.style.overflow = 'hidden';
+  try {
+    const baseUrl = config.public.apiBase || 'https://localhost:7014';
+
+    const newPosts = await $fetch<PostGetDto[]>(`${baseUrl}/api/feed`, {
+      method: 'GET',
+      headers: token.value ? { 'Authorization': `Bearer ${token.value}` } : {},
+      params: {
+        limit: limit,
+        skip: isInitial ? 0 : posts.value.length
+      }
+    });
+
+    if (isInitial) {
+      posts.value = newPosts;
+    } else {
+      posts.value.push(...newPosts);
+    }
+
+    if (newPosts.length < limit) {
+      hasMore.value = false;
+    }
+
+  } catch (error: any) {
+    if (error.data?.errors) {
+      errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
+    } else if (error.data?.message) {
+      errorMessage.value = error.data.message;
+    }
+    hasMore.value = false;
+    console.error('Помилка завантаження стрічки:', error);
+  } finally {
+    isLoading.value = false;
+    isLoadingMore.value = false;
+  }
 };
 
-const closePost = () => {
-  selectedPost.value = null;
-  document.body.style.overflow = 'auto';
+const setupObserver = () => {
+  observer = new IntersectionObserver(
+    (entries) => {
+      const target = entries[0];
+      if (target?.isIntersecting && !isLoading.value && !isLoadingMore.value && hasMore.value) {
+        fetchFeed(false);
+      }
+    },
+    {
+      root: null,
+      threshold: 0.1,
+      rootMargin: '100px'
+    }
+  );
+
+  if (observerTarget.value) {
+    observer.observe(observerTarget.value);
+  }
 };
+
+onMounted(() => {
+  fetchFeed(true).then(() => {
+    setupObserver();
+  });
+});
+
+onUnmounted(() => {
+  if (observer && observerTarget.value) {
+    observer.unobserve(observerTarget.value);
+    observer.disconnect();
+  }
+});
 </script>
 
 <template>
-  <div class="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-      
-      <nav class="flex justify-between items-center mb-12 border-b border-plum-light/30 pb-8">
-        <h1 class="text-4xl font-black text-main tracking-tighter italic">Versum</h1>
-        <div class="flex items-center gap-6">
-          <template v-if="isLoggedIn">
-            <span class="text-main font-bold hidden sm:inline">{{ nickname }}</span>
-            <button class="bg-plum-light text-main px-5 py-2 rounded-full text-sm font-bold shadow-lg">Вийти</button>
-          </template>
-        </div>
-      </nav>
+  <div class="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-8 custom-bg">
+    <div class="max-w-[1520px] mx-auto">
+      <header class="mb-12 text-center">
+        <h1 class="text-4xl sm:text-5xl font-black text-main mb-4">Versum</h1>
+        <p class="text-muted text-lg">Відкривай для себе нові світи</p>
+      </header>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div 
-          v-for="post in posts" 
-          :key="post.id" 
-          @click="openPost(post)"
-          class="group bg-cream-dark backdrop-blur-md rounded-3xl border border-plum-light/10 p-8 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full"
-        >
-          <div class="flex justify-between items-start mb-4">
-            <h2 class="text-2xl font-bold text-main group-hover:text-plum-light transition-colors line-clamp-2">
-              {{ post.title }}
-            </h2>
-          </div>
-          
-          <span class="text-[10px] font-black uppercase tracking-widest text-main bg-plum-light px-2 py-1 rounded-md self-start mb-4">
-            @{{ post.authorName }}
-          </span>
-          
-          <p class="text-main/90 text-base leading-relaxed flex-grow line-clamp-6">
-            {{ post.content }}
-          </p>
-          
-          <div class="mt-8 pt-6 border-t border-plum-light/10 text-[11px] font-bold text-plum-light/50 flex justify-between">
-            <span>{{ new Date(post.createdAt).toLocaleDateString('uk-UA') }}</span>
-            <span class="uppercase">Читати →</span>
+      <div v-if="isLoading" class="flex flex-col items-center justify-center py-20 text-plum">
+        <Icon name="mdi:loading" class="w-16 h-16 animate-spin mb-4" />
+        <span class="text-muted font-medium">Завантаження історій...</span>
+      </div>
+
+      <div v-else-if="!posts.length" class="text-center py-20">
+        <Icon name="mdi:book-open-blank-variant" class="w-24 h-24 mx-auto text-plum-light/50 mb-4" />
+        <p class="text-main text-xl font-bold">Стрічка порожня</p>
+        <p class="text-muted">Тут поки немає жодного твору.</p>
+      </div>
+
+      <div v-else>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-12">
+          <PostCard v-for="post in posts" :key="post.postId" :post="post" />
+        </div>
+
+        <div ref="observerTarget" class="h-4 w-full mt-8"></div>
+
+        <div v-if="isLoadingMore" class="flex justify-center items-center py-8 text-plum-light">
+          <Icon name="mdi:loading" class="w-8 h-8 animate-spin" />
+        </div>
+
+        <p v-if="errorMessage" class="error-text text-red-500">{{ errorMessage }}</p>
+        <div v-if="!hasMore && posts.length > 0" class="flex flex-col items-center justify-center py-16 mt-8 space-y-6">
+          <p class="text-muted italic font-serif">Ви дочитали до самого кінця...</p>
+
+          <div class="flex flex-col items-center pt-8 border-t-2 border-dashed border-plum-light/30">
+            <Icon name="mdi:earth" class="w-10 h-10 text-plum mb-3 animate-pulse" />
+            <h3 class="text-2xl font-black text-main tracking-widest uppercase">
+              Ви докопали до Китаю!
+            </h3>
+            <p class="text-sm text-plum-light mt-2 font-bold flex items-center">
+              <Icon name="mdi:zombie" class="w-5 h-5 mr-1" />
+              *Звуки зомбі китайською*
+            </p>
           </div>
         </div>
       </div>
     </div>
-
-    <Teleport to="body">
-      <Transition name="fade">
-        <div v-if="selectedPost" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          <div @click="closePost" class="absolute inset-0 bg-main/60 backdrop-blur-sm"></div>
-          
-          <div class="relative bg-cream w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-plum-light/20 p-8 sm:p-12">
-            <button 
-              @click="closePost" 
-              class="absolute top-6 right-6 text-plum-light hover:rotate-90 transition-transform p-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <header class="mb-8 border-b border-plum-light/10 pb-6">
-              <span class="text-xs font-black uppercase tracking-widest text-plum-light mb-2 block">
-                Автор: @{{ selectedPost.authorName }} • {{ new Date(selectedPost.createdAt).toLocaleDateString('uk-UA') }}
-              </span>
-              <h2 class="text-4xl sm:text-5xl font-black text-main italic leading-tight">
-                {{ selectedPost.title }}
-              </h2>
-            </header>
-
-            <div class="prose prose-lg max-w-none text-main/90 leading-loose whitespace-pre-wrap font-serif">
-              {{ selectedPost.content }}
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
   </div>
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-
-.min-h-screen {
+.custom-bg {
   background-image: radial-gradient(var(--color-plum-light) 0.5px, transparent 0.5px);
   background-size: 40px 40px;
   background-attachment: fixed;
-  background-color: var(--color-cream);
-}
-
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: var(--color-plum-light);
-  border-radius: 10px;
 }
 </style>
