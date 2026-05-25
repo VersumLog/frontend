@@ -99,9 +99,9 @@ onUnmounted(() => {
 
 <template>
   <div class="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-8 custom-bg">
-    <div class="max-w-[1520px] mx-auto">
+    <div class="max-w-7xl mx-auto"> 
       <header class="mb-12 text-center">
-        <h1 class="text-4xl sm:text-5xl font-black text-main mb-4">Versum</h1>
+        <h1 class="text-5xl sm:text-5xl font-black text-main mb-4">Versum</h1>
         <p class="text-muted text-lg">Відкривай для себе нові світи</p>
       </header>
 
@@ -131,7 +131,7 @@ onUnmounted(() => {
         <div v-if="!hasMore && posts.length > 0" class="flex flex-col items-center justify-center py-16 mt-8 space-y-6">
           <p class="text-muted italic font-serif">Ви дочитали до самого кінця...</p>
 
-          <div class="flex flex-col items-center pt-8 border-t-2 border-dashed border-plum-light/30">
+          <div class="flex flex-col items-center pt-8 border-t-2 border-dashed border-plum-light">
             <Icon name="mdi:earth" class="w-10 h-10 text-plum mb-3 animate-pulse" />
             <h3 class="text-2xl font-black text-main tracking-widest uppercase">
               Ви докопали до Китаю!

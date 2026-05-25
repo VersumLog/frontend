@@ -7,4 +7,8 @@ export interface PostGetDto {
   username: string;
   name: string;
   genres: string[];
+  likesCount: number;
+  commentsCount: number;
+  isLikedByUser: boolean;
+  isSavedByUser: boolean;
 }

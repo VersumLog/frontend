@@ -148,7 +148,7 @@ watch([activeTab, sortBy, sortDesc], () => {
           leave-active-class="transition-all duration-200 ease-in"
           enter-from-class="opacity-0 -translate-y-2.5 scale-95" leave-to-class="opacity-0 -translate-y-2.5 scale-95">
           <div v-if="isSortMenuOpen"
-            class="absolute top-full right-0 mt-1.5 bg-mauve border-4 border-mint-dark rounded-xl py-5 px-[30px] min-w-[260px] text-white shadow-2xl z-[1002]"
+            class="absolute top-full right-0 mt-1.5 bg-cream-dark border-4 border-plum rounded-xl py-5 px-[30px] min-w-[260px] text-white shadow-2xl z-[1002]"
             @click.stop>
             <button
               class="absolute top-[15px] right-[15px] bg-transparent border-none cursor-pointer text-muted p-0 flex items-center justify-center transition-opacity hover:opacity-70"
@@ -164,24 +164,24 @@ watch([activeTab, sortBy, sortDesc], () => {
 
             <ul class="list-none p-0 m-0">
               <li
-                class="flex items-center gap-3 mb-3 cursor-pointer text-lg text-white font-medium transition-opacity hover:opacity-80"
+                class="flex items-center gap-3 mb-3 cursor-pointer text-lg text-muted font-medium transition-opacity hover:opacity-80"
                 @click="sortBy = 'Title'">
                 <span
-                  :class="['w-3.5 h-3.5 border-2 border-white rounded-full inline-block transition-colors', sortBy === 'Title' ? 'bg-white' : 'bg-transparent']"></span>
+                  :class="['w-3.5 h-3.5 border-2 border-white rounded-full inline-block transition-colors', sortBy === 'Title' ? 'bg-muted' : 'bg-transparent']"></span>
                 Назвою
               </li>
               <li
-                class="flex items-center gap-3 mb-3 cursor-pointer text-lg text-white font-medium transition-opacity hover:opacity-80"
+                class="flex items-center gap-3 mb-3 cursor-pointer text-lg text-muted font-medium transition-opacity hover:opacity-80"
                 @click="sortBy = 'Description'">
                 <span
-                  :class="['w-3.5 h-3.5 border-2 border-white rounded-full inline-block transition-colors', sortBy === 'Description' ? 'bg-white' : 'bg-transparent']"></span>
+                  :class="['w-3.5 h-3.5 border-2 border-white rounded-full inline-block transition-colors', sortBy === 'Description' ? 'bg-muted' : 'bg-transparent']"></span>
                 Описом
               </li>
               <li
-                class="flex items-center gap-3 mb-3 cursor-pointer text-lg text-white font-medium transition-opacity hover:opacity-80"
+                class="flex items-center gap-3 mb-3 cursor-pointer text-lg text-muted font-medium transition-opacity hover:opacity-80"
                 @click="sortBy = 'CreatedAt'">
                 <span
-                  :class="['w-3.5 h-3.5 border-2 border-white rounded-full inline-block transition-colors', sortBy === 'CreatedAt' ? 'bg-white' : 'bg-transparent']"></span>
+                  :class="['w-3.5 h-3.5 border-2 border-white rounded-full inline-block transition-colors', sortBy === 'CreatedAt' ? 'bg-muted' : 'bg-transparent']"></span>
                 Датою
               </li>
             </ul>
@@ -189,7 +189,7 @@ watch([activeTab, sortBy, sortDesc], () => {
             <button
               class="absolute bottom-[15px] right-[15px] bg-transparent border-none cursor-pointer flex items-center justify-center w-10 h-10 p-0 text-black hover:opacity-70 transition-opacity"
               @click="sortDesc = !sortDesc" title="Змінити напрямок">
-              <svg v-if="!sortDesc" viewBox="0 0 24 24" class="w-7 h-7 shrink-0">
+              <svg v-if="!sortDesc" viewBox="0 0 24 24" class="w-7 h-7 shrink-0 text-main">
                 <path d="M4 18h4v-2H4v2zm0-5h8v-2H4v2zm0-7v2h12V6H4zm15 8v-4h-2v4h-3l4 4 4-4h-3z" fill="currentColor" />
               </svg>
               <svg v-else viewBox="0 0 24 24" class="w-7 h-7 shrink-0">

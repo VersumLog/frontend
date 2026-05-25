@@ -33,9 +33,9 @@ const fetchPost = async () => {
     });
 
     post.value = data;
-
-    // TODO: GET LIKES AND COMMENTS COUNT
-    // likesCount.value = data.LikesCount; 
+    likesCount.value = data.likesCount; 
+    isLiked.value = data.isLikedByUser;
+    isSaved.value = data.isSavedByUser;
   } catch (error: any) {
     console.error('Помилка завантаження поста:', error);
 
@@ -75,8 +75,9 @@ const handleOpenComments = () => {
 const handleToggleSave = async () => {
   isSaved.value = !isSaved.value;
 
+  const action = isSaved.value ? 'save-post' : 'unsave-post';
   try {
-    await $fetch(`${config.public.apiBase}/api/posts/${postId}/save`, {
+    await $fetch(`${config.public.apiBase}/api/savings/${postId}/${action}`, {
       method: 'POST',
       headers: token.value ? { 'Authorization': `Bearer ${token.value}` } : {},
       body: { isSaved: isSaved.value }
@@ -92,17 +93,27 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-cream flex flex-col font-sans selection:bg-plum/20">
+  <div class="bg-cream flex flex-col font-sans selection:bg-plum">
     <div>
-      <div
-        class="max-w-4xl mx-auto flex flex-col gap-6 p-6 bg-cream-dark rounded-xl shadow-sm border border-cream-input">
-        <PostLoader v-if="isLoading" :postId="postId"/>
+      <div class="max-w-4xl mx-auto flex flex-col gap-6 p-6 bg-cream-dark rounded-xl shadow-sm border border-cream-input">
+        <PostLoader v-if="isLoading" :postId?="postId"/>
         <PostError v-else-if="errorMessage" :errorMessage="errorMessage" @retry="fetchPost" />
         <ReadingContent v-else-if="post" :post="post" />
       </div>
     </div>
 
-    <ReadingActions v-if="post" :likesCount="0" :is-liked="isLiked" :is-saved="isSaved" @toggle-like="handleToggleLike"
-      @open-comments="handleOpenComments" @toggle-save="handleToggleSave" />
+    <ReadingActions 
+      v-if="post" 
+      :likesCount="likesCount" 
+      :is-liked="isLiked" 
+      :is-saved="isSaved" 
+      @toggle-like="handleToggleLike"
+      @open-comments="handleOpenComments" 
+      @toggle-save="handleToggleSave" 
+    />
+
+    <div class="max-w-4xl mx-auto w-full mt-6">
+      <NuxtPage /> 
+    </div>
   </div>
 </template>

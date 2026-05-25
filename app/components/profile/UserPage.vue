@@ -57,7 +57,7 @@ const handleFollowUpdate = (isNowFollowing: boolean) => {
           <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-2">
             <div class="flex gap-6 md:gap-10 text-xl md:text-2xl font-medium">
 
-              <Statistics :works-count="userData.worksCount" :following-count="userData.followingCount"
+              <Statistics :username="userData.username" :works-count="userData.worksCount" :following-count="userData.followingCount"
                 :followers-count="userData.followersCount" />
             </div>
             <div class="w-full sm:w-auto">
