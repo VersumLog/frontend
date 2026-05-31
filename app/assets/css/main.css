@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  font-family: 'Montserrat', sans-serif;
+
+  background-color: var(--color-cream);
+  color: var(--text-main);
+}
+* {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.2s;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  filter: blur(5px);
+}
+
+.error-text {
+  color: #8b0000;
+  font-size: 14px;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+:root {
+  /* --- СВІТЛА ТЕМА (Дефолтна) --- */
+
+  /* 1. Родина Plum (Слива): кнопки, навбар, акценти фокусу */
+  --color-plum: #512d3f;
+  --color-plum-hover: #432534;
+  --color-plum-light: #8a5169;
+  --color-plum-scroll: #7E4864;
+  --color-plum-scroll-hover: #61344B;
+
+  /* 2. Родина Mint (М'ята): картки творів, успішні дії */
+  --color-mint: #4f9689;
+  --color-mint-dark: #1c4b43;
+  --color-mint-light: #55bba6;
+  --color-mint-hover: #4aa694;
+
+  /* 3. Родина Cream (Кремовий беж): основні фони сторінок, панелі, інпути */
+  --color-cream: #FDE9D1;
+  --color-cream-dark: #EFD6AC;
+  --color-cream-light: #FFF1DB;
+  --color-cream-input: #F3EDF0;
+
+  /* 4. Родина Mauve (Мармеладно-рожевий): модалки, меню сортування */
+  --color-mauve: #E4C1D3;
+  --color-mauve-dark: #7E4864;
+  --color-mauve-light: #dcbccd;
+
+  /* 5. Системні кольори тексту та елементів */
+  --text-main: #04151F;
+  --text-muted: #4A3A41;
+  --bg-input: #FFFFFF;
+}
+
+.dark {
+  /* --- ТЕМНА ТЕМА --- */
+
+  --color-plum: #7E4864;
+  --color-plum-hover: #9E5D7F;
+  --color-plum-light: #2D1B22;
+  --color-plum-scroll: #4A2739;
+  --color-plum-scroll-hover: #341A27;
+
+  --color-mint: #22423D;
+  --color-mint-dark: #0D211E;
+  --color-mint-light: #2E5A53;
+  --color-mint-hover: #366B62;
+
+  --color-cream: #271e25;
+  --color-cream-dark: #1F181D;
+  --color-cream-light: #1A1418;
+  --color-cream-input: #261D23;
+
+  --color-mauve: #2A1D24;
+  --color-mauve-dark: #532E41;
+  --color-mauve-light: #33232C;
+
+  --text-main: #FDE9D1;
+  --text-muted: #A6929C;
+  --bg-input: #342730;
+}
