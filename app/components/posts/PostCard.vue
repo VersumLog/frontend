@@ -11,7 +11,7 @@ const goToReadPage = () => {
 </script>
 
 <template>
-  <article 
+  <div 
     @click="goToReadPage"
     class="group relative flex flex-col bg-cream-dark border-2 border-plum-light rounded-[2rem] p-8 sm:p-10 hover:border-plum hover:-translate-y-2 transition-all duration-500 cursor-pointer shadow-lg hover:shadow-2xl h-full overflow-hidden"
   >
@@ -56,5 +56,5 @@ const goToReadPage = () => {
       </span>
       <Icon name="mdi:arrow-right" class="w-6 h-6 transform group-hover:translate-x-3 transition-transform duration-300" />
     </footer>
-  </article>
+  </div>
 </template>

@@ -67,7 +67,7 @@ const saveProfile = async () => {
       method: 'POST',
       headers: token ? { 'Authorization': `Bearer ${token.value}` } : {},
       body: {
-        Username: form.username,
+        Username: form.username.toLowerCase(),
         Name: form.name,
         Bio: form.bio
       }

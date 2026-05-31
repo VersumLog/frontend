@@ -12,7 +12,7 @@ const router = useRouter();
 const config = useRuntimeConfig();
 const { token } = useAuth();
 
-const postId = route.params.id;
+const postId = route.params.id as string;
 
 const post = ref<PostGetDto | null>(null);
 const isLoading = ref<boolean>(true);
@@ -96,7 +96,7 @@ onMounted(() => {
   <div class="bg-cream flex flex-col font-sans selection:bg-plum">
     <div>
       <div class="max-w-4xl mx-auto flex flex-col gap-6 p-6 bg-cream-dark rounded-xl shadow-sm border border-cream-input">
-        <PostLoader v-if="isLoading" :postId?="postId"/>
+        <PostLoader v-if="isLoading" :postId="postId"/>
         <PostError v-else-if="errorMessage" :errorMessage="errorMessage" @retry="fetchPost" />
         <ReadingContent v-else-if="post" :post="post" />
       </div>
@@ -111,9 +111,5 @@ onMounted(() => {
       @open-comments="handleOpenComments" 
       @toggle-save="handleToggleSave" 
     />
-
-    <div class="max-w-4xl mx-auto w-full mt-6">
-      <NuxtPage /> 
-    </div>
   </div>
 </template>

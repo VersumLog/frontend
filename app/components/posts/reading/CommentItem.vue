@@ -17,6 +17,10 @@ const emit = defineEmits<{
 
 const { nickname, isLoggedIn } = useAuth();
 
+const goToCommenterPage = () => {
+  navigateTo(`/profile/${props.comment.username}`);
+};
+
 const isOwner = computed(() => isLoggedIn.value && nickname.value === props.comment.username);
 </script>
 
@@ -24,8 +28,13 @@ const isOwner = computed(() => isLoggedIn.value && nickname.value === props.comm
   <div class="flex flex-col md:flex-row gap-4 p-4 mb-4 rounded-lg bg-cream-dark dark:bg-cream-dark shadow-sm transition-colors">
     <div class="flex-1">
       <div class="flex justify-between items-center mb-2">
-        <span class="font-bold text-main">{{ comment.username }}</span>
-        <span class="text-sm text-muted">{{ new Date(comment.createdAt).toLocaleDateString() }}</span>
+        <button @click="goToCommenterPage">
+          <span class="text-sm font-black uppercase tracking-widest text-plum flex items-center bg-plum-light px-2 py-1 rounded-full transition-opacity hover:opacity-70 focus:outline-none">
+            <Icon name="mdi:account-edit" class="w-5 h-5 mr-2" />
+            {{ comment.username }}
+          </span>
+        </button>
+        <span class="text-sm text-muted">{{ new Date(comment.createdAt).toLocaleDateString('uk-UA') }}</span>
       </div>
       <p class="text-main">{{ comment.content }}</p>
     </div>

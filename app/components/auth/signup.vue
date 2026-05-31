@@ -1,24 +1,25 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const nickname = ref('');
+const username = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const config = useRuntimeConfig();
 const errorMessage = ref('');
 const successMessage = ref('');
+const { token, nickname } = useAuth()
 
-const isNicknameTaken = ref(false);
+const isusernameTaken = ref(false);
 
 const emit = defineEmits(['login']);
 
 const handleSignup = async () => {
   errorMessage.value = '';
   successMessage.value = '';
-  isNicknameTaken.value = false;
+  isusernameTaken.value = false;
 
-  if (!nickname.value || !password.value || !email.value) {
+  if (!username.value || !password.value || !email.value) {
     errorMessage.value = "Будь ласка, заповніть всі поля";
     return;
   }
@@ -34,26 +35,23 @@ const handleSignup = async () => {
   }
 
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/Auth/register`, {
+    const response = await $fetch<any>(`${config.public.apiBase}/api/Auth/register`, {
       method: 'POST',
       body: {
-        username: nickname.value,
+        username: username.value.toLowerCase(),
         password: password.value,
-        email: email.value
+        email: email.value.toLowerCase()
       }
     });
-
+    token.value = response.token;
+    nickname.value = username.value;
     successMessage.value = "Реєстрація успішна! Перевірте пошту для підтвердження :)";
-
-    nickname.value = '';
-    email.value = '';
-    password.value = '';
-    confirmPassword.value = '';
+    navigateTo('/');
 
   } catch (error: any) {
     if (error.status === 400 || error.status === 409) {
       errorMessage.value = "Цей нікнейм чи пошта вже існує";
-      isNicknameTaken.value = true;
+      isusernameTaken.value = true;
 
       if (error.data?.errors) {
         errorMessage.value = Object.values(error.data.errors).flat()[0] as string;
@@ -77,9 +75,9 @@ const handleSignup = async () => {
     <h1 class="text-center text-[32px] font-black text-main my-10">ВІТАЮ!</h1>
 
     <div class="flex flex-col gap-[15px]">
-      <input v-model="nickname" type="text" placeholder="Введіть нікнейм(малими літерами)"
+      <input v-model="username" type="text" placeholder="Введіть нікнейм(малими літерами)"
         class="w-full py-4 px-6 rounded-2xl border-2 border-plum-light bg-input-bg text-main placeholder:text-muted/60 text-base box-border transition-all duration-200 focus:outline-none focus:border-mint focus:ring-2 focus:ring-mint/20 disabled:opacity-70 disabled:cursor-not-allowed"
-        :class="{ '!border-red-600 !ring-red-600/20': isNicknameTaken }" @input="isNicknameTaken = false" />
+        :class="{ '!border-red-600 !ring-red-600/20': isusernameTaken }" @input="isusernameTaken = false" />
       <input v-model="email" type="email" placeholder="Введіть email"
         class="w-full py-4 px-6 rounded-2xl border-2 border-plum-light bg-input-bg text-base box-border transition-all duration-200 focus:outline focus:border-mint focus:outline-2 focus:outline-plum" />
       <input v-model="password" type="password" placeholder="Введіть пароль"

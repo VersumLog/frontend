@@ -25,7 +25,7 @@ const formattedDate = computed(() => {
   <div 
     @click="emit('read', notification.id)"
     class="flex items-start gap-3 p-3 transition-colors duration-200 cursor-pointer rounded-md"
-    :class="notification.isRead ? 'bg-transparent hover:bg-mauve-light' : 'bg-plum-light hover:bg-plum-light'"
+    :class="notification.isRead ? 'bg-transparent hover:bg-mauve-light' : 'bg-cream-dark hover:bg-cream-light'"
   >
     <div class="flex-shrink-0 mt-1">
       <Icon v-if="notification.type === 'Follower'" name="lucide:user-plus" class="w-5 h-5 text-plum" />

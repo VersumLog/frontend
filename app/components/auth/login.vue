@@ -9,6 +9,7 @@ const emailFieldError = ref('');
 const passwordFieldError = ref('');
 const isEmailValid = ref(false);
 const isPasswordValid = ref(false);
+const { token, nickname } = useAuth()
 
 defineEmits(['signup', 'forgot']);
 
@@ -46,30 +47,18 @@ const handleLogin = async () => {
     return;
   }
 
-  const tokenCookie = useCookie('auth_token', {
-    maxAge: 60 * 1440, // 24 hours
-    sameSite: 'lax',
-    secure: config.public.isProd,
-  });
-
   try {
     const response = await $fetch<any>(`${config.public.apiBase}/api/Auth/login`, {
       method: 'POST',
       body: {
-        UsernameOrGmail: email.value,
+        UsernameOrGmail: email.value.toLowerCase(),
         Password: password.value
       }
     });
     console.log("Успіх:", response);
     if (response.token && response.username) {
-      tokenCookie.value = response.token;
-
-      const userNickname = useCookie('user_nickname', {
-        maxAge: 60 * 1440,
-        sameSite: 'lax',
-        secure: config.public.isProd,
-      });
-      userNickname.value = response.username;
+      token.value = response.token;
+      nickname.value = response.username;
 
       console.log("Токен та нікнейм збережено!");
       navigateTo('/');
